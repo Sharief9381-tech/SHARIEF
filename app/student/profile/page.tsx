@@ -8,16 +8,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function ProfilePage() {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black">
       <DashboardHeader
         title="Profile & Resume"
         description="Manage your profile and build your professional resume"
       />
       <div className="flex-1 p-6">
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="bg-secondary">
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="resume">Resume Builder</TabsTrigger>
+          <TabsList className="bg-gray-800 border-gray-700">
+            <TabsTrigger value="profile" className="data-[state=active]:bg-gray-700 data-[state=active]:text-white">Profile</TabsTrigger>
+            <TabsTrigger value="resume" className="data-[state=active]:bg-gray-700 data-[state=active]:text-white">Resume Builder</TabsTrigger>
           </TabsList>
           <TabsContent value="profile">
             <ProfileForm />

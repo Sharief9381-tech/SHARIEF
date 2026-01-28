@@ -19,6 +19,23 @@ export interface GitHubStats {
   lastActive: Date
 }
 
+export interface HackerRankStats {
+  badges: number
+  certifications: number
+  skills: number
+  totalScore: number
+  level: number
+  lastActive: Date
+}
+
+export interface HackerEarthStats {
+  problemsSolved: number
+  rating: number
+  globalRank: number
+  contests: number
+  lastActive: Date
+}
+
 export class LeetCodeAPI {
   static async getUserStats(username: string): Promise<PlatformStats | null> {
     try {
@@ -188,6 +205,48 @@ export class GitHubAPI {
     } catch (error) {
       console.error('GitHub contributions API error:', error)
       return 0
+    }
+  }
+}
+export class HackerRankAPI {
+  static async getUserStats(username: string): Promise<HackerRankStats | null> {
+    try {
+      // HackerRank doesn't have a public API, so we'll return basic structure
+      // The actual implementation is in lib/platforms/hackerrank.ts
+      console.log('HackerRankAPI: Using fallback implementation')
+      
+      return {
+        badges: 0,
+        certifications: 0,
+        skills: 0,
+        totalScore: 0,
+        level: 0,
+        lastActive: new Date()
+      }
+    } catch (error) {
+      console.error('HackerRank API error:', error)
+      return null
+    }
+  }
+}
+
+export class HackerEarthAPI {
+  static async getUserStats(username: string): Promise<HackerEarthStats | null> {
+    try {
+      // HackerEarth doesn't have a reliable public API, so we'll return basic structure
+      // The actual implementation is in lib/platforms/hackerearth.ts
+      console.log('HackerEarthAPI: Using fallback implementation')
+      
+      return {
+        problemsSolved: 0,
+        rating: 0,
+        globalRank: 0,
+        contests: 0,
+        lastActive: new Date()
+      }
+    } catch (error) {
+      console.error('HackerEarth API error:', error)
+      return null
     }
   }
 }

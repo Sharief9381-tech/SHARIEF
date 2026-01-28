@@ -15,7 +15,7 @@ export default async function PlatformsPage() {
   const student = serializeUser(user) as StudentProfile
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black">
       <DashboardHeader
         title="Platforms"
         description="Manage your connected coding platforms"

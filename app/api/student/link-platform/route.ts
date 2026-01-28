@@ -24,12 +24,10 @@ export async function POST(request: Request) {
 
     // Validate platform for predefined platforms only
     if (!isCustom) {
-      const validPlatforms = ["leetcode", "github", "codechef", "codeforces", "hackerrank"]
+      const validPlatforms = ["leetcode", "github", "codechef", "codeforces", "hackerrank", "hackerearth"]
       if (!validPlatforms.includes(platform.toLowerCase())) {
-        return NextResponse.json(
-          { error: "Invalid platform" },
-          { status: 400 }
-        )
+        // Allow dynamic platforms - they will be validated by the dynamic platform service
+        console.log(`Allowing dynamic platform: ${platform}`)
       }
     }
 

@@ -2,7 +2,8 @@ import {
   fetchLeetCodeStats, 
   fetchGitHubStats, 
   fetchCodeforcesStats, 
-  fetchCodeChefStats 
+  fetchCodeChefStats,
+  fetchHackerRankStats
 } from '@/lib/platforms'
 
 export interface AggregatedStats {
@@ -17,21 +18,38 @@ export interface AggregatedStats {
       medium: number
       hard: number
       rating: number
+      contributionPoints: number
+      reputation: number
     }
     github: {
       contributions: number
       repositories: number
       followers: number
+      following: number
+      languages: Record<string, number>
     }
     codeforces: {
       problems: number
       rating: number
       contests: number
+      maxRating: number
+      rank: string
+      contribution: number
     }
     codechef: {
       problems: number
       rating: number
       stars: string
+      highestRating: number
+      globalRank: number
+    }
+    hackerrank: {
+      badges: number
+      certifications: number
+      skills: number
+      level: number
+      totalScore: number
+      globalRank: number
     }
   }
   skillsAnalysis: {
@@ -50,10 +68,11 @@ export interface AggregatedStats {
 export class PlatformAggregator {
   static async aggregateUserStats(linkedPlatforms: Record<string, string>): Promise<AggregatedStats> {
     const platformBreakdown = {
-      leetcode: { problems: 0, easy: 0, medium: 0, hard: 0, rating: 0 },
-      github: { contributions: 0, repositories: 0, followers: 0 },
-      codeforces: { problems: 0, rating: 0, contests: 0 },
-      codechef: { problems: 0, rating: 0, stars: '1*' }
+      leetcode: { problems: 0, easy: 0, medium: 0, hard: 0, rating: 0, contributionPoints: 0, reputation: 0 },
+      github: { contributions: 0, repositories: 0, followers: 0, following: 0, languages: {} },
+      codeforces: { problems: 0, rating: 0, contests: 0, maxRating: 0, rank: 'unrated', contribution: 0 },
+      codechef: { problems: 0, rating: 0, stars: '1*', highestRating: 0, globalRank: 0 },
+      hackerrank: { badges: 0, certifications: 0, skills: 0, level: 0, totalScore: 0, globalRank: 0 }
     }
 
     let totalProblems = 0
@@ -133,13 +152,37 @@ export class PlatformAggregator {
           platformBreakdown.codechef = {
             problems: codechefStats.problemsSolved,
             rating: codechefStats.currentRating,
-            stars: codechefStats.stars
+            stars: codechefStats.stars,
+            highestRating: codechefStats.highestRating,
+            globalRank: codechefStats.globalRank
           }
           totalProblems += codechefStats.problemsSolved
           currentRating = Math.max(currentRating, codechefStats.currentRating)
         }
       } catch (error) {
         console.error('Error fetching CodeChef stats:', error)
+      }
+    }
+
+    // Fetch and aggregate HackerRank stats
+    if (linkedPlatforms.hackerrank) {
+      try {
+        const hackerrankStats = await fetchHackerRankStats(linkedPlatforms.hackerrank)
+        if (hackerrankStats) {
+          platformBreakdown.hackerrank = {
+            badges: hackerrankStats.badges.length,
+            certifications: hackerrankStats.certifications.length,
+            skills: hackerrankStats.skills.length,
+            level: hackerrankStats.level,
+            totalScore: hackerrankStats.totalScore,
+            globalRank: hackerrankStats.globalRank
+          }
+          // HackerRank doesn't have traditional "problems solved" but we can count skills/challenges
+          totalProblems += hackerrankStats.skills.length
+          currentRating = Math.max(currentRating, hackerrankStats.totalScore)
+        }
+      } catch (error) {
+        console.error('Error fetching HackerRank stats:', error)
       }
     }
 

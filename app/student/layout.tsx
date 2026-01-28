@@ -23,7 +23,7 @@ export default async function StudentLayout({
   const serializedUser = serializeUser(user)
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black">
       <DashboardSidebar user={serializedUser} />
       <main className="flex-1 overflow-auto">
         {children}

@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const validPlatforms = ['leetcode', 'codeforces', 'github', 'codechef', 'hackerrank']
+    const validPlatforms = ['leetcode', 'codeforces', 'github', 'codechef', 'hackerrank', 'hackerearth']
     if (!validPlatforms.includes(platform)) {
       return NextResponse.json(
         { error: "Invalid platform" },

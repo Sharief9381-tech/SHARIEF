@@ -2,11 +2,13 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  Radar,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
   ResponsiveContainer,
+  Tooltip,
 } from "recharts"
 import type { StudentProfile } from "@/lib/types"
 
@@ -25,71 +27,70 @@ export function SkillsChart({ student }: SkillsChartProps) {
     rating: 0,
   }
 
-  // Normalize values for radar chart (0-100 scale)
-  const maxValues = {
-    easy: 300,
-    medium: 200,
-    hard: 100,
-    contests: 50,
-    contributions: 500,
-  }
-
   const data = [
     {
-      subject: "Easy",
-      value: Math.min((stats.easyProblems / maxValues.easy) * 100, 100),
-      fullMark: 100,
+      name: "Easy",
+      value: stats.easyProblems,
+      fill: "#00d4aa", // teal-400
     },
     {
-      subject: "Medium",
-      value: Math.min((stats.mediumProblems / maxValues.medium) * 100, 100),
-      fullMark: 100,
+      name: "Medium", 
+      value: stats.mediumProblems,
+      fill: "#fbbf24", // yellow-400
     },
     {
-      subject: "Hard",
-      value: Math.min((stats.hardProblems / maxValues.hard) * 100, 100),
-      fullMark: 100,
+      name: "Hard",
+      value: stats.hardProblems,
+      fill: "#fb7185", // rose-400
     },
     {
-      subject: "Contests",
-      value: Math.min(
-        (stats.contestsParticipated / maxValues.contests) * 100,
-        100
-      ),
-      fullMark: 100,
+      name: "Contests",
+      value: stats.contestsParticipated,
+      fill: "#60a5fa", // blue-400
     },
     {
-      subject: "Contrib",
-      value: Math.min(
-        (stats.githubContributions / maxValues.contributions) * 100,
-        100
-      ),
-      fullMark: 100,
+      name: "Contrib",
+      value: Math.floor(stats.githubContributions / 10), // Scale down for better visualization
+      fill: "#a78bfa", // violet-400
     },
   ]
 
   return (
-    <Card className="bg-card">
+    <Card className="bg-gradient-to-br from-gray-900 via-gray-800 to-black border-gray-700 shadow-2xl">
       <CardHeader>
-        <CardTitle className="text-sm">Skill Distribution</CardTitle>
+        <CardTitle className="text-white font-bold text-lg">Skill Distribution</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[200px]">
+        <div className="h-[250px]">
           <ResponsiveContainer width="100%" height="100%">
-            <RadarChart data={data}>
-              <PolarGrid stroke="hsl(var(--border))" />
-              <PolarAngleAxis
-                dataKey="subject"
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+            <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="2 2" stroke="#374151" opacity={0.8} />
+              <XAxis 
+                dataKey="name" 
+                tick={{ fill: "#d1d5db", fontSize: 12, fontWeight: 500 }}
+                axisLine={{ stroke: "#6b7280", strokeWidth: 1 }}
               />
-              <Radar
-                name="Skills"
-                dataKey="value"
-                stroke="hsl(var(--primary))"
-                fill="hsl(var(--primary))"
-                fillOpacity={0.3}
+              <YAxis 
+                tick={{ fill: "#d1d5db", fontSize: 12, fontWeight: 500 }}
+                axisLine={{ stroke: "#6b7280", strokeWidth: 1 }}
               />
-            </RadarChart>
+              <Tooltip 
+                contentStyle={{
+                  backgroundColor: "#111827",
+                  border: "1px solid #374151",
+                  borderRadius: "8px",
+                  color: "#f9fafb",
+                  boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.5)"
+                }}
+                cursor={{ fill: "rgba(107, 114, 128, 0.1)" }}
+              />
+              <Bar 
+                dataKey="value" 
+                radius={[6, 6, 0, 0]}
+                stroke="#1f2937"
+                strokeWidth={1}
+              />
+            </BarChart>
           </ResponsiveContainer>
         </div>
       </CardContent>

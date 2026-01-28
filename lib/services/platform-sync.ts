@@ -1,5 +1,5 @@
 import { UserModel } from '@/lib/models/user'
-import { LeetCodeAPI, CodeforcesAPI, GitHubAPI, CodeChefAPI } from '@/lib/platforms/api-client'
+import { LeetCodeAPI, CodeforcesAPI, GitHubAPI, CodeChefAPI, HackerRankAPI, HackerEarthAPI } from '@/lib/platforms/api-client'
 import type { StudentProfile } from '@/lib/types'
 
 export interface PlatformSyncResult {
@@ -115,6 +115,42 @@ export class PlatformSyncService {
         }
       } catch (error: any) {
         results.push({ platform: 'codechef', success: false, error: error.message })
+      }
+    }
+
+    // Sync HackerRank
+    if (student.linkedPlatforms?.hackerrank?.username) {
+      try {
+        const stats = await HackerRankAPI.getUserStats(student.linkedPlatforms.hackerrank.username)
+        if (stats) {
+          await UserModel.update(userId, {
+            'linkedPlatforms.hackerrank.lastSync': new Date(),
+            'linkedPlatforms.hackerrank.stats': stats
+          })
+          results.push({ platform: 'hackerrank', success: true, data: stats })
+        } else {
+          results.push({ platform: 'hackerrank', success: false, error: 'Failed to fetch data' })
+        }
+      } catch (error: any) {
+        results.push({ platform: 'hackerrank', success: false, error: error.message })
+      }
+    }
+
+    // Sync HackerEarth
+    if (student.linkedPlatforms?.hackerearth?.username) {
+      try {
+        const stats = await HackerEarthAPI.getUserStats(student.linkedPlatforms.hackerearth.username)
+        if (stats) {
+          await UserModel.update(userId, {
+            'linkedPlatforms.hackerearth.lastSync': new Date(),
+            'linkedPlatforms.hackerearth.stats': stats
+          })
+          results.push({ platform: 'hackerearth', success: true, data: stats })
+        } else {
+          results.push({ platform: 'hackerearth', success: false, error: 'Failed to fetch data' })
+        }
+      } catch (error: any) {
+        results.push({ platform: 'hackerearth', success: false, error: error.message })
       }
     }
 

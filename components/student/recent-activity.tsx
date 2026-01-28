@@ -50,22 +50,22 @@ export function RecentActivity({ student }: RecentActivityProps) {
   ]
 
   return (
-    <Card className="bg-card">
+    <Card className="bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 border-gray-700 shadow-2xl">
       <CardHeader>
-        <CardTitle className="text-sm">Recent Activity</CardTitle>
+        <CardTitle className="text-white text-xl font-bold">Recent Activity</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         {activities.map((activity) => {
           const Icon = activity.icon
           return (
-            <div key={activity.id} className="flex items-start gap-3">
-              <div className={`mt-0.5 ${activity.color}`}>
-                <Icon className="h-4 w-4" />
+            <div key={activity.id} className="flex items-start gap-4 p-4 rounded-xl bg-gray-800/50 border border-gray-700 hover:bg-gray-800/70 transition-all duration-200">
+              <div className={`mt-1 p-2 rounded-lg bg-gray-700 ${activity.color}`}>
+                <Icon className="h-5 w-5" />
               </div>
-              <div className="flex-1 space-y-1">
-                <p className="text-sm text-foreground">{activity.title}</p>
-                <p className="text-xs text-muted-foreground">
-                  {activity.platform} • {activity.time}
+              <div className="flex-1 space-y-2">
+                <p className="text-sm font-medium text-white">{activity.title}</p>
+                <p className="text-xs text-gray-400">
+                  <span className="font-medium text-blue-400">{activity.platform}</span> • {activity.time}
                 </p>
               </div>
             </div>

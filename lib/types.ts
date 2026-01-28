@@ -53,6 +53,7 @@ export interface StudentProfile extends BaseProfile {
     github?: PlatformConnection
     codechef?: PlatformConnection
     hackerrank?: PlatformConnection
+    hackerearth?: PlatformConnection
     [key: string]: PlatformConnection | undefined // Allow custom platforms
   }
   stats?: StudentStats

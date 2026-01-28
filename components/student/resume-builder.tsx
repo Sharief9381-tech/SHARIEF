@@ -106,80 +106,85 @@ export function ResumeBuilder() {
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       <div className="space-y-6">
-        <Card className="bg-card">
+        <Card className="bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 border-gray-700 shadow-2xl">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Work Experience</CardTitle>
-              <CardDescription>Add your internships and work experience</CardDescription>
+              <CardTitle className="text-white">Work Experience</CardTitle>
+              <CardDescription className="text-gray-300">Add your internships and work experience</CardDescription>
             </div>
-            <Button onClick={addExperience} size="sm" className="gap-2">
+            <Button onClick={addExperience} size="sm" className="gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-lg">
               <Plus className="h-4 w-4" />
               Add
             </Button>
           </CardHeader>
           <CardContent className="space-y-6">
             {experiences.map((exp, index) => (
-              <div key={exp.id} className="space-y-4 rounded-lg border border-border bg-secondary/30 p-4">
+              <div key={exp.id} className="space-y-4 rounded-lg border border-gray-600 bg-gray-800/50 p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <GripVertical className="h-4 w-4 cursor-move text-muted-foreground" />
-                    <span className="text-sm font-medium text-muted-foreground">Experience {index + 1}</span>
+                    <GripVertical className="h-4 w-4 cursor-move text-gray-400" />
+                    <span className="text-sm font-medium text-gray-300">Experience {index + 1}</span>
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => removeExperience(exp.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
+                  <Button variant="ghost" size="icon" onClick={() => removeExperience(exp.id)} className="text-red-400 hover:text-red-300 hover:bg-red-900/20">
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Job Title</Label>
+                    <Label className="text-gray-200">Job Title</Label>
                     <Input
                       placeholder="Software Engineer Intern"
                       value={exp.title}
                       onChange={(e) => updateExperience(exp.id, "title", e.target.value)}
+                      className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Company</Label>
+                    <Label className="text-gray-200">Company</Label>
                     <Input
                       placeholder="Google"
                       value={exp.company}
                       onChange={(e) => updateExperience(exp.id, "company", e.target.value)}
+                      className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Location</Label>
+                    <Label className="text-gray-200">Location</Label>
                     <Input
                       placeholder="Bangalore, India"
                       value={exp.location}
                       onChange={(e) => updateExperience(exp.id, "location", e.target.value)}
+                      className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
                     />
                   </div>
                   <div className="flex gap-2">
                     <div className="flex-1 space-y-2">
-                      <Label>Start Date</Label>
+                      <Label className="text-gray-200">Start Date</Label>
                       <Input
                         placeholder="May 2024"
                         value={exp.startDate}
                         onChange={(e) => updateExperience(exp.id, "startDate", e.target.value)}
+                        className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
                       />
                     </div>
                     <div className="flex-1 space-y-2">
-                      <Label>End Date</Label>
+                      <Label className="text-gray-200">End Date</Label>
                       <Input
                         placeholder="Jul 2024"
                         value={exp.endDate}
                         onChange={(e) => updateExperience(exp.id, "endDate", e.target.value)}
+                        className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
                       />
                     </div>
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label>Description</Label>
+                    <Label className="text-gray-200">Description</Label>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-7 gap-1 text-xs"
+                      className="h-7 gap-1 text-xs text-purple-400 hover:text-purple-300 hover:bg-purple-900/20"
                       onClick={generateWithAI}
                       disabled={generating}
                     >
@@ -196,6 +201,7 @@ export function ResumeBuilder() {
                     rows={3}
                     value={exp.description}
                     onChange={(e) => updateExperience(exp.id, "description", e.target.value)}
+                    className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400"
                   />
                 </div>
               </div>
@@ -203,67 +209,71 @@ export function ResumeBuilder() {
           </CardContent>
         </Card>
 
-        <Card className="bg-card">
+        <Card className="bg-gradient-to-br from-emerald-900 via-teal-900 to-cyan-900 border-emerald-700 shadow-2xl">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Projects</CardTitle>
-              <CardDescription>Showcase your best projects</CardDescription>
+              <CardTitle className="text-white">Projects</CardTitle>
+              <CardDescription className="text-emerald-200">Showcase your best projects</CardDescription>
             </div>
-            <Button onClick={addProject} size="sm" className="gap-2">
+            <Button onClick={addProject} size="sm" className="gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white border-0 shadow-lg">
               <Plus className="h-4 w-4" />
               Add
             </Button>
           </CardHeader>
           <CardContent className="space-y-6">
             {projects.map((proj, index) => (
-              <div key={proj.id} className="space-y-4 rounded-lg border border-border bg-secondary/30 p-4">
+              <div key={proj.id} className="space-y-4 rounded-lg border border-emerald-600 bg-emerald-800/30 p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <GripVertical className="h-4 w-4 cursor-move text-muted-foreground" />
-                    <span className="text-sm font-medium text-muted-foreground">Project {index + 1}</span>
+                    <GripVertical className="h-4 w-4 cursor-move text-emerald-400" />
+                    <span className="text-sm font-medium text-emerald-200">Project {index + 1}</span>
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => removeProject(proj.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
+                  <Button variant="ghost" size="icon" onClick={() => removeProject(proj.id)} className="text-red-400 hover:text-red-300 hover:bg-red-900/20">
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label>Project Name</Label>
+                    <Label className="text-emerald-200">Project Name</Label>
                     <Input
                       placeholder="Project Name"
                       value={proj.name}
                       onChange={(e) => updateProject(proj.id, "name", e.target.value)}
+                      className="bg-emerald-700/50 border-emerald-600 text-white placeholder:text-emerald-300"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Project Link</Label>
+                    <Label className="text-emerald-200">Project Link</Label>
                     <Input
                       placeholder="https://github.com/..."
                       value={proj.link}
                       onChange={(e) => updateProject(proj.id, "link", e.target.value)}
+                      className="bg-emerald-700/50 border-emerald-600 text-white placeholder:text-emerald-300"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>Description</Label>
+                  <Label className="text-emerald-200">Description</Label>
                   <Textarea
                     placeholder="Describe your project..."
                     rows={2}
                     value={proj.description}
                     onChange={(e) => updateProject(proj.id, "description", e.target.value)}
+                    className="bg-emerald-700/50 border-emerald-600 text-white placeholder:text-emerald-300"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Technologies</Label>
+                  <Label className="text-emerald-200">Technologies</Label>
                   <div className="flex flex-wrap gap-2">
                     {proj.technologies.map((tech) => (
-                      <Badge key={tech} variant="secondary">
+                      <Badge key={tech} className="bg-emerald-600 text-white border-emerald-500 shadow-md">
                         {tech}
                       </Badge>
                     ))}
                   </div>
                   <Input
                     placeholder="Add technologies (comma separated)"
+                    className="bg-emerald-700/50 border-emerald-600 text-white placeholder:text-emerald-300"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         const input = e.currentTarget.value
@@ -281,54 +291,54 @@ export function ResumeBuilder() {
       </div>
 
       <div className="lg:sticky lg:top-6 lg:self-start">
-        <Card className="bg-card">
+        <Card className="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 border-indigo-700 shadow-2xl">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Resume Preview</CardTitle>
+            <CardTitle className="text-white">Resume Preview</CardTitle>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="gap-2 bg-transparent">
+              <Button variant="outline" size="sm" className="gap-2 bg-indigo-800/50 border-indigo-600 text-indigo-200 hover:bg-indigo-700/50">
                 <Eye className="h-4 w-4" />
                 Preview
               </Button>
-              <Button size="sm" className="gap-2">
+              <Button size="sm" className="gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white border-0 shadow-lg">
                 <Download className="h-4 w-4" />
                 Download PDF
               </Button>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="aspect-[8.5/11] rounded-lg border border-border bg-background p-6 text-xs">
+            <div className="aspect-[8.5/11] rounded-lg border border-indigo-600 bg-gray-900 p-6 text-xs shadow-inner">
               <div className="space-y-4">
                 <div className="text-center">
-                  <h2 className="text-lg font-bold text-foreground">John Doe</h2>
-                  <p className="text-muted-foreground">Software Engineer</p>
-                  <p className="text-muted-foreground">john@example.com | +91 9876543210 | Mumbai, India</p>
+                  <h2 className="text-lg font-bold text-white">John Doe</h2>
+                  <p className="text-indigo-300">Software Engineer</p>
+                  <p className="text-indigo-400">john@example.com | +91 9876543210 | Mumbai, India</p>
                 </div>
                 
-                <Separator />
+                <Separator className="bg-indigo-600" />
                 
                 <div>
-                  <h3 className="mb-2 font-semibold text-foreground">Experience</h3>
+                  <h3 className="mb-2 font-semibold text-white">Experience</h3>
                   {experiences.map((exp) => (
                     <div key={exp.id} className="mb-2">
                       <div className="flex justify-between">
-                        <span className="font-medium">{exp.title || "Job Title"}</span>
-                        <span className="text-muted-foreground">{exp.startDate} - {exp.endDate}</span>
+                        <span className="font-medium text-indigo-200">{exp.title || "Job Title"}</span>
+                        <span className="text-indigo-400">{exp.startDate} - {exp.endDate}</span>
                       </div>
-                      <p className="text-muted-foreground">{exp.company || "Company"} | {exp.location}</p>
-                      <p className="mt-1">{exp.description}</p>
+                      <p className="text-indigo-300">{exp.company || "Company"} | {exp.location}</p>
+                      <p className="mt-1 text-gray-300">{exp.description}</p>
                     </div>
                   ))}
                 </div>
 
                 <div>
-                  <h3 className="mb-2 font-semibold text-foreground">Projects</h3>
+                  <h3 className="mb-2 font-semibold text-white">Projects</h3>
                   {projects.map((proj) => (
                     <div key={proj.id} className="mb-2">
-                      <span className="font-medium">{proj.name || "Project Name"}</span>
-                      <p className="mt-1">{proj.description}</p>
+                      <span className="font-medium text-indigo-200">{proj.name || "Project Name"}</span>
+                      <p className="mt-1 text-gray-300">{proj.description}</p>
                       <div className="mt-1 flex flex-wrap gap-1">
                         {proj.technologies.map((tech) => (
-                          <span key={tech} className="rounded bg-secondary px-1 text-[10px]">
+                          <span key={tech} className="rounded bg-indigo-800/50 px-1 text-[10px] text-indigo-200">
                             {tech}
                           </span>
                         ))}
@@ -338,15 +348,15 @@ export function ResumeBuilder() {
                 </div>
 
                 <div>
-                  <h3 className="mb-2 font-semibold text-foreground">Coding Stats</h3>
+                  <h3 className="mb-2 font-semibold text-white">Coding Stats</h3>
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="rounded bg-secondary/50 p-2">
-                      <p className="font-medium">456</p>
-                      <p className="text-muted-foreground">Problems Solved</p>
+                    <div className="rounded bg-indigo-800/30 p-2 border border-indigo-700">
+                      <p className="font-medium text-white">456</p>
+                      <p className="text-indigo-300">Problems Solved</p>
                     </div>
-                    <div className="rounded bg-secondary/50 p-2">
-                      <p className="font-medium">1892</p>
-                      <p className="text-muted-foreground">Max Rating</p>
+                    <div className="rounded bg-indigo-800/30 p-2 border border-indigo-700">
+                      <p className="font-medium text-white">1892</p>
+                      <p className="text-indigo-300">Max Rating</p>
                     </div>
                   </div>
                 </div>
