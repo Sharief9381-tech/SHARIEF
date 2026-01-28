@@ -1,5 +1,10 @@
 import { UserModel } from '@/lib/models/user'
-import { LeetCodeAPI, CodeforcesAPI, GitHubAPI, CodeChefAPI, HackerRankAPI, HackerEarthAPI } from '@/lib/platforms/api-client'
+import { fetchLeetCodeStats } from '@/lib/platforms/leetcode'
+import { fetchGitHubStats } from '@/lib/platforms/github'
+import { fetchCodeChefStats } from '@/lib/platforms/codechef'
+import { fetchCodeforcesStats } from '@/lib/platforms/codeforces'
+import { fetchHackerRankStats } from '@/lib/platforms/hackerrank'
+import { fetchHackerEarthStats } from '@/lib/platforms/hackerearth'
 import type { StudentProfile } from '@/lib/types'
 
 export interface PlatformSyncResult {
@@ -43,13 +48,9 @@ export class PlatformSyncService {
     // Sync LeetCode
     if (student.linkedPlatforms?.leetcode?.username) {
       try {
-        const stats = await LeetCodeAPI.getUserStats(student.linkedPlatforms.leetcode.username)
+        const stats = await fetchLeetCodeStats(student.linkedPlatforms.leetcode.username)
         if (stats) {
           await UserModel.update(userId, {
-            'stats.totalProblems': stats.totalProblems,
-            'stats.easyProblems': stats.easyProblems,
-            'stats.mediumProblems': stats.mediumProblems,
-            'stats.hardProblems': stats.hardProblems,
             'linkedPlatforms.leetcode.lastSync': new Date(),
             'linkedPlatforms.leetcode.stats': stats
           })
@@ -65,10 +66,9 @@ export class PlatformSyncService {
     // Sync Codeforces
     if (student.linkedPlatforms?.codeforces?.username) {
       try {
-        const stats = await CodeforcesAPI.getUserStats(student.linkedPlatforms.codeforces.username)
+        const stats = await fetchCodeforcesStats(student.linkedPlatforms.codeforces.username)
         if (stats) {
           await UserModel.update(userId, {
-            'stats.rating': Math.max(student.stats?.rating || 0, stats.rating),
             'linkedPlatforms.codeforces.lastSync': new Date(),
             'linkedPlatforms.codeforces.stats': stats
           })
@@ -84,10 +84,9 @@ export class PlatformSyncService {
     // Sync GitHub
     if (student.linkedPlatforms?.github?.username) {
       try {
-        const stats = await GitHubAPI.getUserStats(student.linkedPlatforms.github.username)
+        const stats = await fetchGitHubStats(student.linkedPlatforms.github.username)
         if (stats) {
           await UserModel.update(userId, {
-            'stats.githubContributions': stats.contributions,
             'linkedPlatforms.github.lastSync': new Date(),
             'linkedPlatforms.github.stats': stats
           })
@@ -103,7 +102,7 @@ export class PlatformSyncService {
     // Sync CodeChef
     if (student.linkedPlatforms?.codechef?.username) {
       try {
-        const stats = await CodeChefAPI.getUserStats(student.linkedPlatforms.codechef.username)
+        const stats = await fetchCodeChefStats(student.linkedPlatforms.codechef.username)
         if (stats) {
           await UserModel.update(userId, {
             'linkedPlatforms.codechef.lastSync': new Date(),
@@ -121,7 +120,7 @@ export class PlatformSyncService {
     // Sync HackerRank
     if (student.linkedPlatforms?.hackerrank?.username) {
       try {
-        const stats = await HackerRankAPI.getUserStats(student.linkedPlatforms.hackerrank.username)
+        const stats = await fetchHackerRankStats(student.linkedPlatforms.hackerrank.username)
         if (stats) {
           await UserModel.update(userId, {
             'linkedPlatforms.hackerrank.lastSync': new Date(),
@@ -139,7 +138,7 @@ export class PlatformSyncService {
     // Sync HackerEarth
     if (student.linkedPlatforms?.hackerearth?.username) {
       try {
-        const stats = await HackerEarthAPI.getUserStats(student.linkedPlatforms.hackerearth.username)
+        const stats = await fetchHackerEarthStats(student.linkedPlatforms.hackerearth.username)
         if (stats) {
           await UserModel.update(userId, {
             'linkedPlatforms.hackerearth.lastSync': new Date(),

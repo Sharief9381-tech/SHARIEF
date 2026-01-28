@@ -4,7 +4,7 @@ import { PlatformSyncService } from "@/lib/services/platform-sync"
 
 export async function POST() {
   try {
-    console.log("Platform sync POST request received")
+    console.log("=== PLATFORM SYNC API CALLED ===")
     
     const user = await getCurrentUser()
     console.log("Current user:", user ? { id: user._id, role: user.role } : "null")
@@ -24,16 +24,27 @@ export async function POST() {
     }
 
     console.log("Starting platform sync for user:", user._id)
+    console.log("User linked platforms:", user.linkedPlatforms)
+    
     const results = await PlatformSyncService.syncUserPlatforms(user._id as string)
     console.log("Sync results:", results)
+
+    // Count successful syncs
+    const successfulSyncs = results.filter(r => r.success).length
+    const totalPlatforms = results.length
 
     return NextResponse.json({
       success: true,
       results,
-      syncedAt: new Date()
+      syncedAt: new Date(),
+      summary: {
+        total: totalPlatforms,
+        successful: successfulSyncs,
+        failed: totalPlatforms - successfulSyncs
+      }
     })
   } catch (error) {
-    console.error("Platform sync error:", error)
+    console.error("=== PLATFORM SYNC ERROR ===", error)
     return NextResponse.json(
       { error: `Failed to sync platforms: ${error instanceof Error ? error.message : 'Unknown error'}` },
       { status: 500 }

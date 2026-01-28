@@ -4,8 +4,10 @@ import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ExternalLink, Plus, Code, Trophy, GitBranch, Check } from "lucide-react"
+import { ExternalLink, Plus, Code, Trophy, GitBranch, Check, Trash2 } from "lucide-react"
 import type { StudentProfile } from "@/lib/types"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 interface PlatformsManagerProps {
   student: StudentProfile
@@ -63,15 +65,59 @@ const platforms = [
 ]
 
 export function PlatformsManager({ student }: PlatformsManagerProps) {
+  const router = useRouter()
   const [linkedPlatforms] = useState<Record<string, string>>(() => {
     const studentPlatforms = student.linkedPlatforms || {}
     return Object.fromEntries(
       Object.entries(studentPlatforms).map(([key, value]) => {
-        const username = typeof value === 'string' ? value : value?.username || ''
+        // Extract username from platform data structure
+        let username = ''
+        if (value?.username) {
+          // Standard structure: { username: "user", linkedAt: Date, isActive: true }
+          username = value.username
+        } else if (typeof value === 'string') {
+          // Fallback: direct string username
+          username = value
+        }
+        
+        // Clean username (remove any URL parts or path segments)
+        username = username.replace(/^https?:\/\/[^\/]+\//, '') // Remove full URL prefix
+                          .replace(/^u\//, '')                    // Remove LeetCode /u/ prefix
+                          .replace(/^profile\//, '')              // Remove HackerRank /profile/ prefix
+                          .replace(/^users\//, '')                // Remove CodeChef /users/ prefix
+                          .replace(/^@/, '')                      // Remove @ prefix if present
+                          .replace(/\/$/, '')                     // Remove trailing slash
+        
         return [key, username]
       })
     )
   })
+
+  const handleUnlinkPlatform = async (platformId: string, platformName: string) => {
+    try {
+      const response = await fetch("/api/platforms/link", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          platform: platformId,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        toast.success(`Successfully unlinked ${platformName}!`)
+        router.refresh()
+      } else {
+        toast.error(data.error || "Failed to unlink platform")
+      }
+    } catch (error) {
+      console.error("Unlink error:", error)
+      toast.error("Failed to unlink platform. Please try again.")
+    }
+  }
 
   const linkedPlatformsList = platforms.filter(p => linkedPlatforms[p.id])
 
@@ -90,12 +136,12 @@ export function PlatformsManager({ student }: PlatformsManagerProps) {
             const linkedUsername = linkedPlatforms[platform.id]
 
             return (
-              <Card key={platform.id} className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-600 shadow-2xl hover:shadow-2xl transition-all duration-300 hover:scale-105 hover:border-gray-500">
-                <CardContent className="p-6">
+              <Card key={platform.id} className="bg-gradient-to-br from-gray-800 to-gray-900 border-gray-600 shadow-2xl hover:shadow-2xl transition-all duration-300 hover:scale-105 hover:border-gray-500 relative h-80">
+                <CardContent className="p-6 pb-16 h-full flex flex-col">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div 
-                        className="h-12 w-12 rounded-xl flex items-center justify-center shadow-lg"
+                        className="h-12 w-12 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0"
                         style={{ backgroundColor: platform.color + '20', border: `2px solid ${platform.color}` }}
                       >
                         <platform.icon 
@@ -103,34 +149,48 @@ export function PlatformsManager({ student }: PlatformsManagerProps) {
                           style={{ color: platform.color }}
                         />
                       </div>
-                      <div>
-                        <h4 className="font-bold text-lg text-white">{platform.name}</h4>
-                        <p className="text-sm text-gray-400">@{linkedUsername}</p>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-bold text-lg text-white truncate">{platform.name}</h4>
+                        <p className="text-sm text-gray-400 truncate">@{linkedUsername}</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="text-center py-6">
+                  <div className="flex-1 text-center py-6">
                     <div className="text-lg text-green-400 font-bold mb-2">✅ Platform Connected</div>
                     <div className="text-sm text-gray-400">Ready to sync data</div>
                   </div>
+                </CardContent>
 
-                  <div className="pt-4 border-t border-gray-700 flex items-center justify-between">
+                {/* Bottom section with View Details link, Verified badge, and Unlink button */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700 bg-gray-800/50">
+                  <div className="flex items-center justify-between">
                     <a
                       href={`${platform.url}/${linkedUsername}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 hover:underline transition-colors duration-200"
                     >
-                      View Profile
+                      View Details
                       <ExternalLink className="h-4 w-4" />
                     </a>
-                    <Badge className="text-xs gap-1 bg-green-600 hover:bg-green-700 text-white border-green-500 shadow-lg">
-                      <Check className="h-3 w-3" />
-                      Verified
-                    </Badge>
+                    <div className="flex-1 flex justify-center">
+                      <Badge className="text-xs gap-1 bg-green-600 hover:bg-green-700 text-white border-green-500 shadow-lg">
+                        <Check className="h-3 w-3" />
+                        Verified
+                      </Badge>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleUnlinkPlatform(platform.id, platform.name)}
+                      className="text-red-400 hover:text-red-300 hover:bg-red-900/20 p-2"
+                      title={`Unlink ${platform.name}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
-                </CardContent>
+                </div>
               </Card>
             )
           })}
