@@ -127,17 +127,28 @@ export async function getCurrentUser(): Promise<
   | Omit<RecruiterProfile, "password">
   | null
 > {
-  const cookieStore = await cookies()
-  const token = cookieStore.get("session_token")?.value
-  if (!token) return null
+  try {
+    const cookieStore = await cookies()
+    const token = cookieStore.get("session_token")?.value
+    console.log("getCurrentUser - Token from cookies:", token ? "exists" : "missing")
+    
+    if (!token) return null
 
-  const session = await getSession(token)
-  if (!session) return null
+    const session = await getSession(token)
+    console.log("getCurrentUser - Session:", session ? "found" : "not found")
+    
+    if (!session) return null
 
-  const user = await UserModel.findById(session.userId)
-  if (!user) return null
+    const user = await UserModel.findById(session.userId)
+    console.log("getCurrentUser - User:", user ? { id: user._id, role: user.role } : "not found")
+    
+    if (!user) return null
 
-  const { password, ...rest } = user
+    const { password, ...rest } = user
 
-  return rest as any
+    return rest as any
+  } catch (error) {
+    console.error("getCurrentUser error:", error)
+    return null
+  }
 }

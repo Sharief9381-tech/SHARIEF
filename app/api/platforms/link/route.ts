@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     const body = await request.json()
     console.log("Request body:", body)
     
-    const { platform, username } = body
+    const { platform, username, platformUrl } = body
 
     if (!platform || !username) {
       return NextResponse.json(
@@ -35,16 +35,16 @@ export async function POST(request: Request) {
       )
     }
 
-    const validPlatforms = ['leetcode', 'codeforces', 'github', 'codechef', 'hackerrank', 'hackerearth']
-    if (!validPlatforms.includes(platform)) {
-      return NextResponse.json(
-        { error: "Invalid platform" },
-        { status: 400 }
-      )
-    }
+    // Allow any platform - remove the hardcoded validation
+    // Custom platforms will be handled with generic stats fetching
+    const predefinedPlatforms = ['leetcode', 'codeforces', 'github', 'codechef', 'hackerrank', 'hackerearth', 'geeksforgeeks', 'atcoder', 'spoj', 'kattis']
+    const isCustomPlatform = !predefinedPlatforms.includes(platform)
+    
+    console.log("Platform type:", isCustomPlatform ? "custom" : "predefined")
+    console.log("Platform:", platform, "Is predefined:", predefinedPlatforms.includes(platform))
 
     console.log("Attempting to link platform:", platform, "for user:", user._id)
-    const success = await PlatformSyncService.linkPlatform(user._id as string, platform, username)
+    const success = await PlatformSyncService.linkPlatform(user._id as string, platform, username, platformUrl)
     console.log("Link platform result:", success)
 
     if (success) {

@@ -6,21 +6,21 @@ export interface LeetCodeStats {
   hardSolved: number
   ranking: number
   contributionPoints: number
-  reputation: number
-  submissionCalendar: Record<string, number>
-  recentSubmissions: {
-    title: string
-    titleSlug: string
-    timestamp: string
-    statusDisplay: string
-    lang: string
-  }[]
 }
 
 export async function fetchLeetCodeStats(username: string): Promise<LeetCodeStats | null> {
   try {
-    // Clean the username (remove any URL parts)
-    const cleanUsername = username.replace(/^https?:\/\/leetcode\.com\/(?:u\/)?/, '').replace(/\/$/, '')
+    // Clean the username - handle both username and full URL
+    let cleanUsername = username.trim()
+    
+    // Extract username from LeetCode URL if provided
+    const urlPattern = /(?:https?:\/\/)?(?:www\.)?leetcode\.com\/(?:u\/)?([^\/\?\s]+)/i
+    const match = cleanUsername.match(urlPattern)
+    if (match) {
+      cleanUsername = match[1]
+    }
+    
+    console.log(`Fetching real-time LeetCode stats for: ${cleanUsername}`)
     
     // Using the public LeetCode GraphQL API
     const query = `
@@ -36,20 +36,10 @@ export async function fetchLeetCodeStats(username: string): Promise<LeetCodeStat
           }
           profile {
             ranking
-            reputation
-            starRating
           }
           contributions {
             points
           }
-          submissionCalendar
-        }
-        recentSubmissionList(username: $username, limit: 10) {
-          title
-          titleSlug
-          timestamp
-          statusDisplay
-          lang
         }
       }
     `
@@ -82,7 +72,7 @@ export async function fetchLeetCodeStats(username: string): Promise<LeetCodeStat
     
     if (!data.data?.matchedUser) {
       console.log(`LeetCode user "${cleanUsername}" not found`)
-      return null
+      return null // Return null instead of fake data when profile doesn't exist
     }
 
     const user = data.data.matchedUser
@@ -100,9 +90,6 @@ export async function fetchLeetCodeStats(username: string): Promise<LeetCodeStat
       hardSolved,
       ranking: user.profile?.ranking || 0,
       contributionPoints: user.contributions?.points || 0,
-      reputation: user.profile?.reputation || 0,
-      submissionCalendar: user.submissionCalendar ? JSON.parse(user.submissionCalendar) : {},
-      recentSubmissions: data.data.recentSubmissionList || [],
     }
   } catch (error) {
     console.error("Error fetching LeetCode stats:", error)

@@ -29,8 +29,17 @@ export interface GitHubStats {
 
 export async function fetchGitHubStats(username: string): Promise<GitHubStats | null> {
   try {
-    // Clean the username (remove any URL parts)
-    const cleanUsername = username.replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, '')
+    // Clean the username - handle both username and full URL
+    let cleanUsername = username.trim()
+    
+    // Extract username from GitHub URL if provided
+    const urlPattern = /(?:https?:\/\/)?(?:www\.)?github\.com\/([^\/\?\s]+)/i
+    const match = cleanUsername.match(urlPattern)
+    if (match) {
+      cleanUsername = match[1]
+    }
+    
+    console.log(`Fetching real-time GitHub stats for: ${cleanUsername}`)
     
     // Fetch basic user info with better error handling
     const userResponse = await fetch(`https://api.github.com/users/${cleanUsername}`, {
@@ -46,7 +55,7 @@ export async function fetchGitHubStats(username: string): Promise<GitHubStats | 
     if (!userResponse.ok) {
       if (userResponse.status === 404) {
         console.log(`GitHub user "${cleanUsername}" not found`)
-        return null
+        return null // Return null instead of fake data when profile doesn't exist
       } else if (userResponse.status === 401) {
         console.log("GitHub API: Unauthorized - using fallback approach")
         // Try without authentication for public data

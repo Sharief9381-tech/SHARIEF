@@ -30,10 +30,54 @@ export interface CodeforcesStats {
 
 export async function fetchCodeforcesStats(username: string): Promise<CodeforcesStats | null> {
   try {
-    // Clean the username (remove any URL parts)
-    const cleanUsername = username.replace(/^https?:\/\/codeforces\.com\/profile\//, '').replace(/\/$/, '')
+    // Clean the username - handle both username and full URL
+    let cleanUsername = username.trim()
     
-    // Fetch user info
+    // Extract username from Codeforces URL if provided
+    const urlPattern = /(?:https?:\/\/)?(?:www\.)?codeforces\.com\/profile\/([^\/\?\s]+)/i
+    const match = cleanUsername.match(urlPattern)
+    if (match) {
+      cleanUsername = match[1]
+    }
+    
+    console.log(`Fetching real-time Codeforces stats for: ${cleanUsername}`)
+    
+    // Method 1: Try cp-rating-api first (more reliable for some users)
+    try {
+      console.log(`Trying cp-rating-api for Codeforces: ${cleanUsername}`)
+      const cpApiResponse = await fetch(`https://cp-rating-api.vercel.app/codeforces/${cleanUsername}`, {
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (compatible; StatsBot/1.0)',
+        },
+        signal: AbortSignal.timeout(8000),
+      })
+
+      if (cpApiResponse.ok) {
+        const cpData = await cpApiResponse.json()
+        console.log(`cp-rating-api Codeforces response:`, cpData)
+        
+        if (cpData && !cpData.error && cpData.success !== false) {
+          return {
+            username: cleanUsername,
+            rating: cpData.rating || cpData.current_rating || 0,
+            maxRating: cpData.max_rating || cpData.highest_rating || cpData.rating || 0,
+            rank: cpData.rank || 'unrated',
+            maxRank: cpData.max_rank || cpData.rank || 'unrated',
+            contribution: cpData.contribution || 0,
+            friendOfCount: cpData.friend_of_count || 0,
+            avatar: cpData.avatar || 'https://userpic.codeforces.org/no-avatar.jpg',
+            problemsSolved: cpData.problems_solved || cpData.solved || 0,
+            contests: cpData.contests || [],
+            submissions: cpData.submissions || []
+          }
+        }
+      }
+    } catch (cpApiError) {
+      console.log('cp-rating-api for Codeforces failed:', cpApiError)
+    }
+    
+    // Method 2: Use official Codeforces API
     const userResponse = await fetch(
       `https://codeforces.com/api/user.info?handles=${cleanUsername}`,
       {
@@ -52,7 +96,7 @@ export async function fetchCodeforcesStats(username: string): Promise<Codeforces
     
     if (userData.status !== "OK" || !userData.result?.[0]) {
       console.log(`Codeforces user "${cleanUsername}" not found`)
-      return null
+      return null // Return null instead of fake data when profile doesn't exist
     }
 
     const user = userData.result[0]
@@ -151,6 +195,19 @@ export async function fetchCodeforcesStats(username: string): Promise<Codeforces
     }
   } catch (error) {
     console.error("Error fetching Codeforces stats:", error)
-    return null
+    return null // Return null instead of fake data when error occurs
   }
+}
+
+function getRankFromRating(rating: number): string {
+  if (rating >= 3000) return "legendary grandmaster"
+  if (rating >= 2600) return "international grandmaster"
+  if (rating >= 2400) return "grandmaster"
+  if (rating >= 2300) return "international master"
+  if (rating >= 2100) return "master"
+  if (rating >= 1900) return "candidate master"
+  if (rating >= 1600) return "expert"
+  if (rating >= 1400) return "specialist"
+  if (rating >= 1200) return "pupil"
+  return "newbie"
 }

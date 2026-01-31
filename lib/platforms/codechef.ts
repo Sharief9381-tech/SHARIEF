@@ -1,25 +1,25 @@
 export interface CodeChefStats {
   username: string
-  name: string
   currentRating: number
   highestRating: number
   stars: string
-  countryRank: number
   globalRank: number
   problemsSolved: number
-  contests: {
-    name: string
-    code: string
-    rank: number
-    rating: number
-    ratingChange: number
-  }[]
 }
 
 export async function fetchCodeChefStats(username: string): Promise<CodeChefStats | null> {
   try {
-    // Clean the username (remove any URL parts)
-    const cleanUsername = username.replace(/^https?:\/\/codechef\.com\/users\//, '').replace(/\/$/, '')
+    // Clean the username - handle both username and full URL
+    let cleanUsername = username.trim()
+    
+    // Extract username from CodeChef URL if provided
+    const urlPattern = /(?:https?:\/\/)?(?:www\.)?codechef\.com\/users\/([^\/\?\s]+)/i
+    const match = cleanUsername.match(urlPattern)
+    if (match) {
+      cleanUsername = match[1]
+    }
+    
+    console.log(`Fetching real-time CodeChef stats for: ${cleanUsername}`)
     
     // Basic username validation - CodeChef usernames are typically alphanumeric with underscores
     if (!/^[a-zA-Z0-9_]+$/.test(cleanUsername)) {
@@ -45,29 +45,145 @@ export async function fetchCodeChefStats(username: string): Promise<CodeChefStat
       if (response.ok) {
         const html = await response.text()
         
-        // Extract data from HTML using regex patterns
-        const ratingMatch = html.match(/rating["\s]*:[\s]*(\d+)/i)
-        const problemsMatch = html.match(/problems["\s]*solved["\s]*:[\s]*(\d+)/i) || 
-                             html.match(/fully["\s]*solved["\s]*:[\s]*(\d+)/i) ||
-                             html.match(/"solved"["\s]*:[\s]*(\d+)/i)
-        const starsMatch = html.match(/(\d+)\*/) || html.match(/stars["\s]*:[\s]*"?(\d+\*)"?/i)
+        // Enhanced data extraction from HTML based on actual CodeChef structure
+        let currentRating = 0
+        let globalRank = 0
+        let problemsSolved = 0
+        let stars = "1*"
         
-        const currentRating = ratingMatch ? parseInt(ratingMatch[1]) : 0
-        const problemsSolved = problemsMatch ? parseInt(problemsMatch[1]) : 0
-        const stars = starsMatch ? starsMatch[1] + (starsMatch[1].includes('*') ? '' : '*') : getStarsFromRating(currentRating)
+        // Extract problems solved - this pattern works
+        const problemsPatterns = [
+          /Total Problems Solved:\s*(\d+)/i,
+          /problems["\s]*solved["\s]*:[\s]*(\d+)/i,
+          /fully["\s]*solved["\s]*:[\s]*(\d+)/i,
+          /"solved"["\s]*:[\s]*(\d+)/i,
+          /(\d+)\s*problems?\s*solved/i,
+          /solved["\s]*:[\s]*(\d+)/i
+        ]
         
-        console.log(`CodeChef web scraping successful for ${cleanUsername}: ${problemsSolved} problems, ${currentRating} rating`)
+        for (const pattern of problemsPatterns) {
+          const match = html.match(pattern)
+          if (match) {
+            problemsSolved = parseInt(match[1])
+            console.log(`Found CodeChef problems solved: ${problemsSolved} using pattern: ${pattern}`)
+            break
+          }
+        }
+        
+        // Extract stars from HTML - look for patterns like "1★" or "2★"
+        const starsPatterns = [
+          /(\d+)★/g,
+          /(\d+)\*/g,
+          /(\d+)\s*star/gi
+        ]
+        
+        for (const pattern of starsPatterns) {
+          const match = html.match(pattern)
+          if (match) {
+            stars = match[1] + "*"
+            console.log(`Found CodeChef stars: ${stars} using pattern: ${pattern}`)
+            break
+          }
+        }
+        
+        // Extract contests participated (might help estimate rating)
+        const contestsMatch = html.match(/No\. of Contests Participated:\s*(\d+)/i)
+        let contestsParticipated = 0
+        if (contestsMatch) {
+          contestsParticipated = parseInt(contestsMatch[1])
+          console.log(`Found CodeChef contests participated: ${contestsParticipated}`)
+        }
+        
+        // Try to extract rating from various patterns - CodeChef might not show exact rating on public profile
+        const ratingPatterns = [
+          /rating["\s]*:[\s]*(\d+)/gi,
+          /current[_\s]*rating["\s]*:[\s]*(\d+)/gi,
+          /"rating"[:\s]*(\d+)/gi,
+          /(\d{3,4})\s*rating/gi,
+          /"current_rating"[:\s]*(\d+)/gi,
+          /rating[^>]*>(\d+)</gi,
+          /Rating:\s*(\d+)/gi
+        ]
+        
+        for (const pattern of ratingPatterns) {
+          const matches = html.match(pattern)
+          if (matches) {
+            for (const match of matches) {
+              const ratingNum = match.match(/\d+/)
+              if (ratingNum) {
+                const rating = parseInt(ratingNum[0])
+                if (rating >= 400 && rating <= 4000) {
+                  currentRating = rating
+                  console.log(`Found CodeChef rating: ${rating} using pattern: ${pattern}`)
+                  break
+                }
+              }
+            }
+            if (currentRating > 0) break
+          }
+        }
+        
+        // Extract country rank information (if available)
+        const countryRankPatterns = [
+          /Country Rank:\s*(\d+)/i,
+          /rank.*india.*:?\s*(\d+)/i,
+          /india.*rank.*:?\s*(\d+)/i,
+          /country.*rank.*:?\s*(\d+)/i,
+          /rank.*country.*:?\s*(\d+)/i,
+          /(\d+).*rank.*india/i,
+          /(\d+).*india.*rank/i
+        ]
+        
+        let extractedCountryRank = 0
+        for (const pattern of countryRankPatterns) {
+          const match = html.match(pattern)
+          if (match) {
+            extractedCountryRank = parseInt(match[1])
+            console.log(`Found CodeChef country rank: ${extractedCountryRank} using pattern: ${pattern}`)
+            break
+          }
+        }
+        
+        // Extract any ranking information from the profile
+        const rankPatterns = [
+          /rank[:\s]*(\d+)/gi,
+          /ranking[:\s]*(\d+)/gi,
+          /position[:\s]*(\d+)/gi,
+          /(\d+)(?:st|nd|rd|th)?\s*rank/gi,
+          /rank\s*(\d+)/gi
+        ]
+        
+        let extractedRank = 0
+        for (const pattern of rankPatterns) {
+          const matches = html.match(pattern)
+          if (matches) {
+            for (const match of matches) {
+              const rankNum = match.match(/\d+/)
+              if (rankNum) {
+                const rank = parseInt(rankNum[0])
+                if (rank > 0 && rank < 1000000) { // Reasonable rank range
+                  extractedRank = rank
+                  console.log(`Found CodeChef rank: ${rank} using pattern: ${pattern}`)
+                  break
+                }
+              }
+            }
+            if (extractedRank > 0) break
+          }
+        }
+        
+        // If we have contests but no rating, user might be unrated but active
+        if (contestsParticipated > 0 && currentRating === 0) {
+          console.log(`CodeChef user ${cleanUsername} has ${contestsParticipated} contests but no visible rating - might be unrated or rating not public`)
+        }
         
         return {
           username: cleanUsername,
-          name: cleanUsername,
           currentRating,
-          highestRating: currentRating,
+          highestRating: extractedCountryRank || extractedRank || 0, // Use country rank in place of highest rating
           stars,
-          countryRank: 0,
           globalRank: 0,
           problemsSolved,
-          contests: [],
         }
       }
     } catch (scrapingError: any) {
@@ -76,8 +192,11 @@ export async function fetchCodeChefStats(username: string): Promise<CodeChefStat
     
     // Fallback to third-party APIs
     const apis = [
+      `https://cp-rating-api.vercel.app/codechef/${cleanUsername}`,
       `https://codechef-api.vercel.app/handle/${cleanUsername}`,
       `https://competitive-coding-api.herokuapp.com/api/codechef/${cleanUsername}`,
+      `https://codechef-api.herokuapp.com/${cleanUsername}`,
+      `https://api.codechef.com/users/${cleanUsername}`,
     ]
 
     for (const apiUrl of apis) {
@@ -113,14 +232,11 @@ export async function fetchCodeChefStats(username: string): Promise<CodeChefStat
 
           return {
             username: cleanUsername,
-            name: data.name || data.fullName || data.displayName || cleanUsername,
             currentRating: data.currentRating || data.rating || data.current_rating || 0,
-            highestRating: data.highestRating || data.maxRating || data.max_rating || data.rating || 0,
+            highestRating: data.countryRank || data.country_rank || data.highestRating || data.max_rating || 0,
             stars: data.stars || getStarsFromRating(data.currentRating || data.rating || 0),
-            countryRank: data.countryRank || data.country_rank || 0,
             globalRank: data.globalRank || data.global_rank || 0,
             problemsSolved: problemsSolved,
-            contests: data.contests || [],
           }
         }
       } catch (apiError: any) {
@@ -129,22 +245,9 @@ export async function fetchCodeChefStats(username: string): Promise<CodeChefStat
       }
     }
 
-    // If all methods fail, return a basic profile to allow platform linking
-    // This ensures the platform can still be connected even if stats aren't available
-    console.log(`All CodeChef data sources failed for "${cleanUsername}", returning basic profile`)
-    
-    return {
-      username: cleanUsername,
-      name: cleanUsername,
-      currentRating: 0,
-      highestRating: 0,
-      stars: "N/A",
-      countryRank: 0,
-      globalRank: 0,
-      problemsSolved: 0,
-      contests: [],
-      _apiLimited: true,
-    } as CodeChefStats & { _apiLimited?: boolean }
+    // If all methods fail, return null instead of fake data
+    console.log(`All CodeChef data sources failed for "${cleanUsername}"`)
+    return null // Return null instead of fake data when all methods fail
   } catch (error) {
     console.error("Error fetching CodeChef stats:", error)
     return null
