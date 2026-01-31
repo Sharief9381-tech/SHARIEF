@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { isDatabaseAvailable } from "@/lib/database"
+import { Analytics, getVisitorInfo } from "@/lib/analytics"
 import type { UserRole } from "@/lib/types"
 
 export async function POST(request: Request) {
@@ -76,6 +77,18 @@ export async function POST(request: Request) {
 
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user
+
+    // Track login event
+    const visitorInfo = getVisitorInfo(request)
+    await Analytics.track({
+      type: 'user_login',
+      userId: user._id?.toString(),
+      userRole: user.role,
+      metadata: { 
+        email: user.email,
+        name: user.name
+      }
+    }, visitorInfo)
 
     return NextResponse.json({
       success: true,

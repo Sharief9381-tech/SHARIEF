@@ -95,7 +95,6 @@ export function CollegeStats({ college }: CollegeStatsProps) {
       label: "Total Students",
       value: dashboardData.overview.totalStudents,
       icon: GraduationCap,
-      change: `${dashboardData.overview.registrationRate}% on CodeTrack`,
       color: "text-chart-1",
       bgColor: "bg-chart-1/10",
     },
@@ -103,7 +102,6 @@ export function CollegeStats({ college }: CollegeStatsProps) {
       label: "Active Students",
       value: dashboardData.overview.activeStudents,
       icon: Users,
-      change: `${dashboardData.overview.registrationRate}% registered`,
       color: "text-chart-2",
       bgColor: "bg-chart-2/10",
     },
@@ -111,7 +109,6 @@ export function CollegeStats({ college }: CollegeStatsProps) {
       label: "Avg. Problems Solved",
       value: dashboardData.overview.avgProblems,
       icon: Trophy,
-      change: `Avg rating: ${dashboardData.overview.avgRating}`,
       color: "text-chart-3",
       bgColor: "bg-chart-3/10",
     },
@@ -119,7 +116,6 @@ export function CollegeStats({ college }: CollegeStatsProps) {
       label: "Placement Rate",
       value: `${dashboardData.overview.placementRate}%`,
       icon: Briefcase,
-      change: `${dashboardData.overview.avgContributions} avg contributions`,
       color: "text-chart-4",
       bgColor: "bg-chart-4/10",
     },
@@ -147,27 +143,27 @@ export function CollegeStats({ college }: CollegeStatsProps) {
         </button>
       </div>
       
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => {
           const Icon = stat.icon
           return (
             <Card key={stat.label} className="bg-card">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className={`rounded-lg p-2 ${stat.bgColor}`}>
+              <CardContent className="p-4">
+                {/* Icon and number in same row - maximum right */}
+                <div className="flex items-center mb-3 pl-12">
+                  <div className={`rounded-lg p-2 ${stat.bgColor} mr-3`}>
                     <Icon className={`h-5 w-5 ${stat.color}`} />
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {stat.change}
-                  </span>
-                </div>
-                <div className="mt-4">
                   <p className="text-2xl font-bold text-foreground">
                     {typeof stat.value === "number"
                       ? stat.value.toLocaleString()
                       : stat.value}
                   </p>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
+                </div>
+                
+                {/* Label below - centered */}
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground leading-tight">{stat.label}</p>
                 </div>
               </CardContent>
             </Card>

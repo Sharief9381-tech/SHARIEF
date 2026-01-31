@@ -111,6 +111,7 @@ export async function GET(request: Request) {
           id: student._id,
           name: student.name,
           email: student.email,
+          rollNumber: student.rollNumber || 'N/A',
           branch: student.branch || 'Unknown',
           totalProblems: stats.totalProblems || 0,
           githubContributions: stats.githubContributions || 0,

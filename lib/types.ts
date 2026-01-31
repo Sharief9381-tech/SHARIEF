@@ -44,6 +44,7 @@ export interface StudentStats {
 export interface StudentProfile extends BaseProfile {
   role: "student"
   collegeCode: string
+  rollNumber: string
   graduationYear: number
   branch: string
   skills: string[]

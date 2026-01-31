@@ -2,18 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts"
 import { RefreshCw, TrendingUp } from "lucide-react"
 
 interface PlacementData {
@@ -56,7 +44,14 @@ export function PlacementOverview() {
           <CardTitle>Placement Overview</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[300px] animate-pulse bg-secondary/30 rounded" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="text-center p-3 bg-gray-800 border border-gray-700 rounded-lg animate-pulse">
+                <div className="h-8 w-16 bg-gray-600 rounded mx-auto mb-2" />
+                <div className="h-4 w-20 bg-gray-600 rounded mx-auto" />
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
     )
@@ -88,20 +83,6 @@ export function PlacementOverview() {
     )
   }
 
-  // Prepare data for pie chart
-  const pieData = [
-    { name: 'Placed', value: placementData.placed, color: '#10B981' },
-    { name: 'Interviewing', value: placementData.interviewing, color: '#F59E0B' },
-    { name: 'Searching', value: placementData.searching, color: '#6B7280' }
-  ].filter(item => item.value > 0)
-
-  // Historical data (simulated - would come from database in production)
-  const historicalData = [
-    { year: "2022", placed: Math.floor(placementData.placed * 0.7), eligible: Math.floor(placementData.total * 0.8) },
-    { year: "2023", placed: Math.floor(placementData.placed * 0.85), eligible: Math.floor(placementData.total * 0.9) },
-    { year: "2024", placed: placementData.placed, eligible: placementData.total },
-  ]
-
   return (
     <Card className="bg-card">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -115,92 +96,23 @@ export function PlacementOverview() {
         </button>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Current Status Pie Chart */}
-          <div>
-            <h3 className="text-sm font-medium text-foreground mb-4">Current Status</h3>
-            <div className="h-[200px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`}
-                    outerRadius={60}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
+        {/* Summary Statistics Only */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="text-center p-3 bg-gray-800 border border-gray-700 rounded-lg">
+            <p className="text-2xl font-bold text-white">{placementData.total}</p>
+            <p className="text-xs text-gray-300">Total Students</p>
           </div>
-
-          {/* Historical Trends */}
-          <div>
-            <h3 className="text-sm font-medium text-foreground mb-4">Historical Trends</h3>
-            <div className="h-[200px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={historicalData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis
-                    dataKey="year"
-                    tick={{ fill: "hsl(var(--muted-foreground))" }}
-                    axisLine={{ stroke: "hsl(var(--border))" }}
-                  />
-                  <YAxis
-                    tick={{ fill: "hsl(var(--muted-foreground))" }}
-                    axisLine={{ stroke: "hsl(var(--border))" }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--card))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "8px",
-                    }}
-                    labelStyle={{ color: "hsl(var(--foreground))" }}
-                  />
-                  <Bar
-                    dataKey="eligible"
-                    fill="hsl(var(--secondary))"
-                    name="Total Students"
-                    radius={[4, 4, 0, 0]}
-                  />
-                  <Bar
-                    dataKey="placed"
-                    fill="hsl(var(--primary))"
-                    name="Placed Students"
-                    radius={[4, 4, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+          <div className="text-center p-3 bg-green-900 border border-green-700 rounded-lg">
+            <p className="text-2xl font-bold text-green-400">{placementData.placed}</p>
+            <p className="text-xs text-green-300">Placed</p>
           </div>
-        </div>
-
-        {/* Summary Statistics */}
-        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center p-3 bg-secondary/30 rounded-lg">
-            <p className="text-2xl font-bold text-foreground">{placementData.total}</p>
-            <p className="text-xs text-muted-foreground">Total Students</p>
+          <div className="text-center p-3 bg-amber-900 border border-amber-700 rounded-lg">
+            <p className="text-2xl font-bold text-amber-400">{placementData.interviewing}</p>
+            <p className="text-xs text-amber-300">Interviewing</p>
           </div>
-          <div className="text-center p-3 bg-green-500/10 rounded-lg">
-            <p className="text-2xl font-bold text-green-500">{placementData.placed}</p>
-            <p className="text-xs text-muted-foreground">Placed</p>
-          </div>
-          <div className="text-center p-3 bg-yellow-500/10 rounded-lg">
-            <p className="text-2xl font-bold text-yellow-500">{placementData.interviewing}</p>
-            <p className="text-xs text-muted-foreground">Interviewing</p>
-          </div>
-          <div className="text-center p-3 bg-gray-500/10 rounded-lg">
-            <p className="text-2xl font-bold text-gray-500">{placementData.searching}</p>
-            <p className="text-xs text-muted-foreground">Searching</p>
+          <div className="text-center p-3 bg-red-900 border border-red-700 rounded-lg">
+            <p className="text-2xl font-bold text-red-400">{placementData.searching}</p>
+            <p className="text-xs text-red-300">Searching</p>
           </div>
         </div>
 

@@ -5,6 +5,9 @@ import { serializeUser } from "@/lib/serialize"
 import type { StudentProfile } from "@/lib/types"
 import { DashboardClient } from "@/components/student/dashboard-client"
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export default async function StudentDashboard() {
   const user = await getCurrentUser()
 

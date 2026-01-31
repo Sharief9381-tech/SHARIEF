@@ -8,6 +8,9 @@ import { DepartmentBreakdown } from "@/components/college/department-breakdown"
 import { serializeUser } from "@/lib/serialize"
 import type { CollegeProfile } from "@/lib/types"
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export default async function CollegeDashboard() {
   const user = await getCurrentUser()
 

@@ -52,6 +52,7 @@ export async function POST(request: Request) {
         name,
         role: "student" as const,
         collegeCode: additionalData.collegeCode || "",
+        rollNumber: additionalData.rollNumber || "",
         graduationYear: parseInt(additionalData.graduationYear) || new Date().getFullYear() + 4,
         branch: additionalData.branch || "",
         linkedPlatforms: {},

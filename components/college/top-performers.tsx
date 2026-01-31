@@ -10,6 +10,7 @@ interface TopPerformer {
   id: string
   name: string
   email: string
+  rollNumber: string
   branch: string
   totalProblems: number
   githubContributions: number
@@ -117,7 +118,7 @@ export function TopPerformers() {
             </p>
           </div>
         ) : (
-          performers.slice(0, 5).map((performer, index) => (
+          performers.slice(0, 10).map((performer, index) => (
             <div
               key={performer.id}
               className="flex items-center gap-3 rounded-lg border border-border bg-secondary/30 p-3"
@@ -138,7 +139,11 @@ export function TopPerformers() {
                   <p className="font-medium text-foreground">{performer.name}</p>
                   {getStatusBadge(performer.placementStatus)}
                 </div>
-                <p className="text-xs text-muted-foreground">{performer.branch}</p>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span>{performer.rollNumber}</span>
+                  <span>•</span>
+                  <span>{performer.branch}</span>
+                </div>
               </div>
               <div className="text-right">
                 <p className="font-medium text-foreground">{performer.totalProblems}</p>
@@ -148,10 +153,10 @@ export function TopPerformers() {
           ))
         )}
         
-        {performers.length > 5 && (
+        {performers.length > 10 && (
           <div className="text-center pt-2">
             <p className="text-xs text-muted-foreground">
-              Showing top 5 of {performers.length} students
+              Showing top 10 of {performers.length} students
             </p>
           </div>
         )}

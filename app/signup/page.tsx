@@ -50,6 +50,7 @@ function SignupForm() {
     confirmPassword: "",
     // Student specific
     collegeCode: "",
+    rollNumber: "",
     branch: "",
     graduationYear: "",
     // College specific
@@ -210,6 +211,19 @@ function SignupForm() {
                       />
                       <p className="text-xs text-muted-foreground">
                         Enter your college's unique code. Contact your college if you don't know it.
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="rollNumber">Roll Number</Label>
+                      <Input
+                        id="rollNumber"
+                        placeholder="21CS001 (e.g., 21CS001, 2021BCS001)"
+                        value={formData.rollNumber}
+                        onChange={(e) => setFormData({ ...formData, rollNumber: e.target.value.toUpperCase() })}
+                        required
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Enter your college roll number for easy identification.
                       </p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">

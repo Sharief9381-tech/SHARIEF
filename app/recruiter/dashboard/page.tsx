@@ -7,6 +7,9 @@ import { RecentShortlists } from "@/components/recruiter/recent-shortlists"
 import { HiringPipeline } from "@/components/recruiter/hiring-pipeline"
 import type { RecruiterProfile } from "@/lib/types"
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export default async function RecruiterDashboard() {
   const user = await getCurrentUser()
 

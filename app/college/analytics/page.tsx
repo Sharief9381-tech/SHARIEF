@@ -4,6 +4,9 @@ import { DashboardHeader } from "@/components/dashboard/header"
 import { BatchAnalytics } from "@/components/college/batch-analytics"
 import { serializeUser } from "@/lib/serialize"
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export default async function AnalyticsPage() {
   const user = await getCurrentUser()
 

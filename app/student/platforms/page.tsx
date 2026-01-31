@@ -2,6 +2,9 @@ import { getCurrentUser } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { DashboardHeader } from "@/components/dashboard/header"
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export default async function PlatformsPage() {
   const user = await getCurrentUser()
 

@@ -1,12 +1,12 @@
 import { getCurrentUser } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { DashboardHeader } from "@/components/dashboard/header"
-import { StudentsTable } from "@/components/college/students-table"
+import { AnalyticsDashboard } from "@/components/analytics/analytics-dashboard"
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
-export default async function StudentsPage() {
+export default async function WebsiteAnalyticsPage() {
   const user = await getCurrentUser()
 
   if (!user || user.role !== "college") {
@@ -16,11 +16,11 @@ export default async function StudentsPage() {
   return (
     <div className="flex flex-col">
       <DashboardHeader
-        title="Students"
-        description="View and manage registered students"
+        title="Website Analytics"
+        description="Monitor visitor activity and user engagement"
       />
       <div className="flex-1 p-6">
-        <StudentsTable />
+        <AnalyticsDashboard />
       </div>
     </div>
   )

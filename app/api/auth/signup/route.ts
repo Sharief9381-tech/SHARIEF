@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { isDatabaseAvailable } from "@/lib/database"
+import { Analytics, getVisitorInfo } from "@/lib/analytics"
 import type { UserRole } from "@/lib/types"
 
 export async function POST(request: Request) {
@@ -90,6 +91,7 @@ export async function POST(request: Request) {
           ...userData,
           role: "student",
           collegeCode: additionalData.collegeCode || "",
+          rollNumber: additionalData.rollNumber || "",
           graduationYear: parseInt(additionalData.graduationYear) || new Date().getFullYear() + 4,
           branch: additionalData.branch || "",
           linkedPlatforms: {},
@@ -175,6 +177,20 @@ export async function POST(request: Request) {
 
     const redirectTo = `/${role}/dashboard`
     console.log("14. Redirecting to:", redirectTo)
+
+    // Track signup event
+    const visitorInfo = getVisitorInfo(request)
+    await Analytics.track({
+      type: 'user_signup',
+      userId: user._id?.toString(),
+      userRole: role,
+      metadata: { 
+        email: user.email,
+        name: user.name,
+        collegeCode: role === 'student' ? additionalData.collegeCode : undefined,
+        companyName: role === 'recruiter' ? additionalData.companyName : undefined
+      }
+    }, visitorInfo)
 
     return NextResponse.json({
       success: true,
