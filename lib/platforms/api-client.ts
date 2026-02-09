@@ -84,11 +84,13 @@ export class LeetCodeAPI {
       const hard = stats.find((s: any) => s.difficulty === 'Hard')?.count || 0
 
       return {
-        totalProblems: easy + medium + hard,
-        easyProblems: easy,
-        mediumProblems: medium,
-        hardProblems: hard,
-        rating: user.profile.ranking || 0,
+        totalSolved: easy + medium + hard,
+        easySolved: easy,
+        mediumSolved: medium,
+        hardSolved: hard,
+        ranking: user.profile.ranking || 0,
+        contributionPoints: 0, // Not available in this API
+        reputation: 0, // Not available in this API
         contestsParticipated: 0, // Not available in this API
         lastActive: new Date()
       }

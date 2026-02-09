@@ -13,21 +13,30 @@ export async function POST(request: Request) {
       )
     }
 
-    const linkedPlatforms = (user.linkedPlatforms as Record<string, string>) || {}
+    const linkedPlatforms = (user.linkedPlatforms || {}) as Record<string, any>
     
-    if (Object.keys(linkedPlatforms).length === 0) {
+    // Extract usernames from platform connections
+    const platformUsernames: Record<string, string> = {}
+    for (const [platform, data] of Object.entries(linkedPlatforms)) {
+      if (data) {
+        // Handle both string usernames and PlatformConnection objects
+        platformUsernames[platform] = typeof data === 'string' ? data : data.username
+      }
+    }
+    
+    if (Object.keys(platformUsernames).length === 0) {
       return NextResponse.json(
         { error: "No platforms linked" },
         { status: 400 }
       )
     }
 
-    console.log(`Syncing stats for user ${user._id} with platforms:`, Object.keys(linkedPlatforms))
+    console.log(`Syncing stats for user ${user._id} with platforms:`, Object.keys(platformUsernames))
 
     // Aggregate stats from all platforms
     const aggregatedStats = await PlatformAggregator.updateUserAggregatedStats(
       user._id as string, 
-      linkedPlatforms
+      platformUsernames
     )
 
     return NextResponse.json({ 

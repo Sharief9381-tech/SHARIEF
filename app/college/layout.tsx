@@ -15,6 +15,12 @@ export default async function CollegeLayout({
     redirect("/login")
   }
 
+  // Redirect admin users to admin portal instead of college portal
+  if (user.email === "admin@codetrack.com") {
+    redirect("/admin")
+  }
+
+  // Regular role-based access control
   if (user.role !== "college") {
     redirect(`/${user.role}/dashboard`)
   }

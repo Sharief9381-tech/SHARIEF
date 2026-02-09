@@ -87,14 +87,17 @@ export class PlatformAggregator {
         const leetcodeStats = await fetchLeetCodeStats(linkedPlatforms.leetcode)
         if (leetcodeStats) {
           platformBreakdown.leetcode = {
-            problems: leetcodeStats.totalSolved,
-            easy: leetcodeStats.easySolved,
-            medium: leetcodeStats.mediumSolved,
-            hard: leetcodeStats.hardSolved,
-            rating: leetcodeStats.ranking
+            problems: leetcodeStats.totalSolved || 0,
+            easy: leetcodeStats.easySolved || 0,
+            medium: leetcodeStats.mediumSolved || 0,
+            hard: leetcodeStats.hardSolved || 0,
+            rating: leetcodeStats.ranking || 0,
+            contributionPoints: leetcodeStats.contributionPoints || 0,
+            reputation: leetcodeStats.reputation || 0
           }
-          totalProblems += leetcodeStats.totalSolved
-          currentRating = Math.max(currentRating, leetcodeStats.ranking)
+          totalProblems += leetcodeStats.totalSolved || 0
+          // Note: LeetCode ranking is not a rating system, so we don't include it in currentRating
+          // LeetCode doesn't provide contest rating in their public API
         }
       } catch (error) {
         console.error('Error fetching LeetCode stats:', error)
@@ -107,15 +110,17 @@ export class PlatformAggregator {
         const githubStats = await fetchGitHubStats(linkedPlatforms.github)
         if (githubStats) {
           platformBreakdown.github = {
-            contributions: githubStats.totalContributions,
-            repositories: githubStats.publicRepos,
-            followers: githubStats.followers
+            contributions: githubStats.totalContributions || 0,
+            repositories: githubStats.publicRepos || 0,
+            followers: githubStats.followers || 0,
+            following: githubStats.following || 0,
+            languages: githubStats.languages || {}
           }
-          githubContributions = githubStats.totalContributions
+          githubContributions = githubStats.totalContributions || 0
           
           // Extract primary languages
-          const languages = Object.entries(githubStats.languages)
-            .sort(([,a], [,b]) => b - a)
+          const languages = Object.entries(githubStats.languages || {})
+            .sort(([,a], [,b]) => (b as number) - (a as number))
             .slice(0, 3)
             .map(([lang]) => lang)
           primaryLanguages.push(...languages)
@@ -131,13 +136,17 @@ export class PlatformAggregator {
         const codeforcesStats = await fetchCodeforcesStats(linkedPlatforms.codeforces)
         if (codeforcesStats) {
           platformBreakdown.codeforces = {
-            problems: codeforcesStats.problemsSolved,
-            rating: codeforcesStats.rating,
-            contests: codeforcesStats.contests.length
+            problems: codeforcesStats.problemsSolved || 0,
+            rating: codeforcesStats.rating || 0,
+            contests: codeforcesStats.contests?.length || 0,
+            maxRating: codeforcesStats.maxRating || codeforcesStats.rating || 0,
+            rank: codeforcesStats.rank || 'unrated',
+            contribution: codeforcesStats.contribution || 0
           }
-          totalProblems += codeforcesStats.problemsSolved
-          contestsAttended += codeforcesStats.contests.length
-          currentRating = Math.max(currentRating, codeforcesStats.rating)
+          totalProblems += codeforcesStats.problemsSolved || 0
+          contestsAttended += codeforcesStats.contests?.length || 0
+          // Use maxRating instead of current rating
+          currentRating = Math.max(currentRating, codeforcesStats.maxRating || codeforcesStats.rating || 0)
         }
       } catch (error) {
         console.error('Error fetching Codeforces stats:', error)
@@ -157,7 +166,8 @@ export class PlatformAggregator {
             globalRank: codechefStats.globalRank
           }
           totalProblems += codechefStats.problemsSolved
-          currentRating = Math.max(currentRating, codechefStats.currentRating)
+          // Use highestRating instead of currentRating
+          currentRating = Math.max(currentRating, codechefStats.highestRating || codechefStats.currentRating)
         }
       } catch (error) {
         console.error('Error fetching CodeChef stats:', error)

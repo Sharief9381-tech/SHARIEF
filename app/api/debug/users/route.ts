@@ -4,16 +4,18 @@ import { getUsers } from "@/lib/auth"
 export async function GET() {
   try {
     const users = await getUsers()
-    const userList = Array.from(users.entries()).map(([id, user]) => ({
-      id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      createdAt: user.createdAt
-    }))
+    const userList = Array.isArray(users) 
+      ? users.map((user) => ({
+          id: user._id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          createdAt: user.createdAt
+        }))
+      : []
     
     return NextResponse.json({ 
-      count: users.size,
+      count: userList.length,
       users: userList 
     })
   } catch (error) {

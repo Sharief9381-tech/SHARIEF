@@ -2,7 +2,7 @@
 
 import { ObjectId } from 'mongodb'
 
-export type UserRole = "student" | "college" | "recruiter"
+export type UserRole = "student" | "college" | "recruiter" | "admin"
 
 export interface BaseProfile {
   _id?: string | ObjectId
@@ -83,4 +83,10 @@ export interface RecruiterProfile extends BaseProfile {
   designation: string
   hiringFor: string[]
   preferredSkills: string[]
+}
+
+export interface AdminProfile extends BaseProfile {
+  role: "admin"
+  permissions?: string[]
+  isSuperAdmin?: boolean
 }

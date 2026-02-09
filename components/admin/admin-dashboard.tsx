@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { 
   Users, 
   Activity, 
@@ -22,7 +24,16 @@ import {
   Monitor,
   Server,
   Zap,
-  Crown
+  Crown,
+  X,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Award,
+  Code2,
+  GitBranch,
+  Briefcase
 } from "lucide-react"
 
 interface AdminData {
@@ -75,6 +86,8 @@ export function AdminDashboard() {
   const [data, setData] = useState<AdminData | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("overview")
+  const [selectedUser, setSelectedUser] = useState<any>(null)
+  const [userDetailsLoading, setUserDetailsLoading] = useState(false)
 
   useEffect(() => {
     fetchAdminData()
@@ -102,6 +115,31 @@ export function AdminDashboard() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const fetchUserDetails = async (userEmail: string) => {
+    setUserDetailsLoading(true)
+    try {
+      const response = await fetch(`/api/admin/user-details?email=${encodeURIComponent(userEmail)}`)
+      if (response.ok) {
+        const result = await response.json()
+        setSelectedUser(result.user)
+      } else {
+        console.error('Failed to fetch user details:', response.status)
+        // Use mock data for demo
+        setSelectedUser(getMockUserDetails(userEmail))
+      }
+    } catch (error) {
+      console.error('Error fetching user details:', error)
+      // Use mock data for demo
+      setSelectedUser(getMockUserDetails(userEmail))
+    } finally {
+      setUserDetailsLoading(false)
+    }
+  }
+
+  const handleUserClick = (userEmail: string) => {
+    fetchUserDetails(userEmail)
   }
 
   const getStatusIcon = (status: string) => {
@@ -999,40 +1037,157 @@ export function AdminDashboard() {
                 <Activity className="h-6 w-6 text-green-300" />
                 Live Platform Activity Feed (ALL ROLES - ADMIN MONITORING)
               </CardTitle>
+              <p className="text-sm text-white/90 mt-2">
+                Real-time monitoring of user actions across the platform with detailed user information
+              </p>
             </CardHeader>
             <CardContent className="p-6">
               <div className="space-y-3">
-                {data.recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-center gap-3 p-4 rounded-lg bg-gray-800 border-l-4 border-l-green-500">
-                    <Clock className="h-5 w-5 text-gray-300" />
-                    <div className="flex-1">
-                      <div className="text-base">
-                        <span className="font-bold text-blue-400">{activity.user}</span> 
-                        <span className="text-white ml-2">{activity.action}</span>
+                {data.recentActivity.map((activity, index) => {
+                  // Extract user info from activity - use actual email from activity.user
+                  const userEmail = activity.details?.userEmail || activity.user
+                  const userName = activity.details?.userName || userEmail?.split('@')[0] || 'Unknown User'
+                  const userRole = activity.details?.userRole || 'student'
+                  
+                  console.log('Activity:', { userEmail, userName, userRole, activity })
+                  
+                  // Create more descriptive action text
+                  let actionDescription = activity.action
+                  let actionIcon = '📊'
+                  let actionColor = 'bg-gray-600'
+                  
+                  // Determine action type and styling based on event type
+                  const eventType = activity.type.toLowerCase()
+                  
+                  if (eventType.includes('signup') || eventType === 'user_signup') {
+                    actionIcon = '✨'
+                    actionColor = 'bg-green-600'
+                    actionDescription = `created a new ${userRole} account`
+                  } else if (eventType.includes('login') || eventType === 'user_login') {
+                    actionIcon = '🔐'
+                    actionColor = 'bg-purple-600'
+                    actionDescription = `logged in to ${userRole} dashboard`
+                  } else if (eventType.includes('platform') || eventType === 'platform_link') {
+                    actionIcon = '🔗'
+                    actionColor = 'bg-blue-600'
+                    const platform = activity.details?.platform || 'a coding platform'
+                    actionDescription = `connected ${platform} account`
+                  } else if (eventType.includes('job') || eventType === 'job_application') {
+                    actionIcon = '💼'
+                    actionColor = 'bg-orange-600'
+                    const jobTitle = activity.details?.jobTitle || 'a job position'
+                    actionDescription = `applied to ${jobTitle}`
+                  } else if (eventType.includes('page_view')) {
+                    actionIcon = '👁️'
+                    actionColor = 'bg-indigo-600'
+                    const page = activity.details?.page || activity.action || 'a page'
+                    actionDescription = `viewed ${page.replace('/admin', 'admin dashboard').replace('/college', 'college portal').replace('/student', 'student portal').replace('/recruiter', 'recruiter portal')}`
+                  } else if (eventType.includes('page_focus')) {
+                    actionIcon = '🎯'
+                    actionColor = 'bg-cyan-600'
+                    actionDescription = `is actively using the platform`
+                  } else if (eventType.includes('page_blur')) {
+                    actionIcon = '💤'
+                    actionColor = 'bg-gray-600'
+                    actionDescription = `switched to another tab`
+                  } else if (eventType.includes('sync')) {
+                    actionIcon = '🔄'
+                    actionColor = 'bg-teal-600'
+                    const platforms = activity.details?.platforms?.join(', ') || 'platforms'
+                    actionDescription = `synced statistics from ${platforms}`
+                  } else if (eventType.includes('profile')) {
+                    actionIcon = '👤'
+                    actionColor = 'bg-pink-600'
+                    actionDescription = `updated their profile`
+                  } else if (eventType.includes('search')) {
+                    actionIcon = '🔍'
+                    actionColor = 'bg-amber-600'
+                    actionDescription = `searched for candidates`
+                  } else {
+                    // Default for any other event type
+                    actionIcon = '⚡'
+                    actionColor = 'bg-yellow-600'
+                    actionDescription = activity.action || `performed an action`
+                  }
+
+                  return (
+                    <div 
+                      key={index} 
+                      className="flex items-start gap-4 p-5 rounded-lg bg-gray-800 border-l-4 border-l-green-500 hover:bg-gray-750 transition-colors cursor-pointer"
+                      onClick={() => {
+                        console.log('Clicking user:', userEmail)
+                        handleUserClick(userEmail)
+                      }}
+                    >
+                      <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-2xl">
+                        {actionIcon}
                       </div>
-                      <div className="text-sm text-gray-400 mt-1">
-                        {activity.timestamp} • Type: <span className="font-medium text-gray-300">{activity.type}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <div className="flex-1">
+                            <div className="text-base font-bold text-white mb-1">
+                              {userName}
+                            </div>
+                            <div className="text-sm text-gray-400 mb-2">
+                              {userEmail}
+                            </div>
+                            <div className="text-base text-gray-200">
+                              {actionDescription}
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                            <Badge 
+                              variant="outline" 
+                              className={`text-xs font-bold ${
+                                userRole === 'student' ? 'bg-blue-600 text-white border-blue-500' :
+                                userRole === 'college' ? 'bg-green-600 text-white border-green-500' :
+                                userRole === 'recruiter' ? 'bg-purple-600 text-white border-purple-500' :
+                                'bg-gray-600 text-white border-gray-500'
+                              }`}
+                            >
+                              {userRole.toUpperCase()}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs animate-pulse bg-red-600 text-white border-red-500">
+                              LIVE
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4 text-xs text-gray-400 mt-2">
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            <span>{activity.timestamp}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Badge className={`${actionColor} text-white text-xs px-2 py-0.5`}>
+                              {eventType === 'user_signup' ? 'SIGNUP' :
+                               eventType === 'user_login' ? 'LOGIN' :
+                               eventType === 'platform_link' ? 'PLATFORM LINK' :
+                               eventType === 'job_application' ? 'JOB APPLICATION' :
+                               eventType === 'page_view' ? 'PAGE VIEW' :
+                               eventType === 'page_focus' ? 'ACTIVE' :
+                               eventType === 'page_blur' ? 'INACTIVE' :
+                               eventType.replace('_', ' ').toUpperCase()}
+                            </Badge>
+                          </div>
+                          {activity.details?.ip && (
+                            <div className="flex items-center gap-1">
+                              <Globe className="h-3 w-3" />
+                              <span>{activity.details.ip}</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge 
-                        variant="outline" 
-                        className={`text-sm font-bold ${
-                          activity.type === 'signup' ? 'bg-green-600 text-white border-green-500' :
-                          activity.type === 'platform_link' ? 'bg-blue-600 text-white border-blue-500' :
-                          activity.type === 'login' ? 'bg-purple-600 text-white border-purple-500' :
-                          'bg-orange-600 text-white border-orange-500'
-                        }`}
-                      >
-                        {activity.type.replace('_', ' ').toUpperCase()}
-                      </Badge>
-                      <Badge variant="outline" className="text-sm animate-pulse bg-red-600 text-white border-red-500">
-                        LIVE
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
+              {data.recentActivity.length === 0 && (
+                <div className="text-center py-12 text-gray-400">
+                  <Activity className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p className="text-lg font-medium">No recent activity</p>
+                  <p className="text-sm">User actions will appear here in real-time</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -1208,6 +1363,362 @@ export function AdminDashboard() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* USER DETAILS MODAL */}
+      <Dialog open={!!selectedUser} onOpenChange={(open) => !open && setSelectedUser(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden bg-gradient-to-br from-gray-900 to-gray-800 border-2 border-blue-500">
+          <DialogHeader className="border-b border-gray-700 pb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-2xl font-bold text-white">
+                  {selectedUser?.name?.charAt(0) || 'U'}
+                </div>
+                <div>
+                  <DialogTitle className="text-2xl font-bold text-white">
+                    {selectedUser?.name || 'User Details'}
+                  </DialogTitle>
+                  <DialogDescription className="text-gray-300 text-base">
+                    Complete profile and activity information
+                  </DialogDescription>
+                </div>
+              </div>
+              <Badge 
+                className={`text-sm font-bold px-4 py-2 ${
+                  selectedUser?.role === 'student' ? 'bg-blue-600' :
+                  selectedUser?.role === 'college' ? 'bg-green-600' :
+                  selectedUser?.role === 'recruiter' ? 'bg-purple-600' :
+                  'bg-gray-600'
+                }`}
+              >
+                {selectedUser?.role?.toUpperCase() || 'UNKNOWN'}
+              </Badge>
+            </div>
+          </DialogHeader>
+
+          {userDetailsLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <RefreshCw className="h-8 w-8 animate-spin text-blue-500" />
+              <span className="ml-3 text-white">Loading user details...</span>
+            </div>
+          ) : selectedUser ? (
+            <ScrollArea className="h-[calc(90vh-200px)] pr-4">
+              <div className="space-y-6 py-4">
+                {/* BASIC INFORMATION */}
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Users className="h-5 w-5 text-blue-400" />
+                      Basic Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-700">
+                        <Mail className="h-5 w-5 text-blue-400" />
+                        <div>
+                          <div className="text-xs text-gray-400">Email</div>
+                          <div className="text-sm font-medium text-white">{selectedUser.email}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-700">
+                        <Calendar className="h-5 w-5 text-green-400" />
+                        <div>
+                          <div className="text-xs text-gray-400">Joined</div>
+                          <div className="text-sm font-medium text-white">
+                            {new Date(selectedUser.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* STUDENT-SPECIFIC DETAILS */}
+                {selectedUser.role === 'student' && (
+                  <>
+                    {/* ACADEMIC INFO */}
+                    <Card className="bg-gray-800 border-gray-700">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <Award className="h-5 w-5 text-yellow-400" />
+                          Academic Information
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-700">
+                            <Database className="h-5 w-5 text-purple-400" />
+                            <div>
+                              <div className="text-xs text-gray-400">College Code</div>
+                              <div className="text-sm font-medium text-white">{selectedUser.collegeCode || 'N/A'}</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-700">
+                            <Users className="h-5 w-5 text-blue-400" />
+                            <div>
+                              <div className="text-xs text-gray-400">Roll Number</div>
+                              <div className="text-sm font-medium text-white">{selectedUser.rollNumber || 'N/A'}</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-700">
+                            <Calendar className="h-5 w-5 text-green-400" />
+                            <div>
+                              <div className="text-xs text-gray-400">Graduation Year</div>
+                              <div className="text-sm font-medium text-white">{selectedUser.graduationYear || 'N/A'}</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-700">
+                            <Code2 className="h-5 w-5 text-orange-400" />
+                            <div>
+                              <div className="text-xs text-gray-400">Branch</div>
+                              <div className="text-sm font-medium text-white">{selectedUser.branch || 'N/A'}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* CODING STATISTICS */}
+                    <Card className="bg-gray-800 border-gray-700">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <TrendingUp className="h-5 w-5 text-green-400" />
+                          Coding Statistics
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="p-4 rounded-lg bg-gradient-to-br from-blue-600 to-blue-700 text-center">
+                            <div className="text-3xl font-bold text-white">
+                              {selectedUser.stats?.totalProblems || 0}
+                            </div>
+                            <div className="text-sm text-blue-100 mt-1">Total Problems</div>
+                          </div>
+                          <div className="p-4 rounded-lg bg-gradient-to-br from-green-600 to-green-700 text-center">
+                            <div className="text-3xl font-bold text-white">
+                              {selectedUser.stats?.githubContributions || 0}
+                            </div>
+                            <div className="text-sm text-green-100 mt-1">GitHub Contributions</div>
+                          </div>
+                          <div className="p-4 rounded-lg bg-gradient-to-br from-purple-600 to-purple-700 text-center">
+                            <div className="text-3xl font-bold text-white">
+                              {selectedUser.stats?.rating || 0}
+                            </div>
+                            <div className="text-sm text-purple-100 mt-1">Highest Rating</div>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 mt-4">
+                          <div className="p-3 rounded-lg bg-gray-700 text-center">
+                            <div className="text-xl font-bold text-green-400">
+                              {selectedUser.stats?.easyProblems || 0}
+                            </div>
+                            <div className="text-xs text-gray-400">Easy</div>
+                          </div>
+                          <div className="p-3 rounded-lg bg-gray-700 text-center">
+                            <div className="text-xl font-bold text-yellow-400">
+                              {selectedUser.stats?.mediumProblems || 0}
+                            </div>
+                            <div className="text-xs text-gray-400">Medium</div>
+                          </div>
+                          <div className="p-3 rounded-lg bg-gray-700 text-center">
+                            <div className="text-xl font-bold text-red-400">
+                              {selectedUser.stats?.hardProblems || 0}
+                            </div>
+                            <div className="text-xs text-gray-400">Hard</div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* LINKED PLATFORMS */}
+                    <Card className="bg-gray-800 border-gray-700">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <GitBranch className="h-5 w-5 text-blue-400" />
+                          Linked Platforms ({Object.keys(selectedUser.linkedPlatforms || {}).length})
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {selectedUser.linkedPlatforms && Object.keys(selectedUser.linkedPlatforms).length > 0 ? (
+                          <div className="grid grid-cols-2 gap-3">
+                            {Object.entries(selectedUser.linkedPlatforms).map(([platform, data]: [string, any]) => (
+                              <div key={platform} className="flex items-center gap-3 p-3 rounded-lg bg-gray-700 border border-gray-600">
+                                <CheckCircle className="h-5 w-5 text-green-400" />
+                                <div className="flex-1">
+                                  <div className="text-sm font-bold text-white capitalize">{platform}</div>
+                                  <div className="text-xs text-gray-400">
+                                    {typeof data === 'string' ? data : data?.username || 'Connected'}
+                                  </div>
+                                </div>
+                                <Badge className="bg-green-600 text-white text-xs">Active</Badge>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8 text-gray-400">
+                            <Globe className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                            <p>No platforms linked yet</p>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    {/* SKILLS */}
+                    {selectedUser.skills && selectedUser.skills.length > 0 && (
+                      <Card className="bg-gray-800 border-gray-700">
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-white flex items-center gap-2">
+                            <Code2 className="h-5 w-5 text-orange-400" />
+                            Skills ({selectedUser.skills.length})
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedUser.skills.map((skill: string, index: number) => (
+                              <Badge key={index} className="bg-blue-600 text-white">
+                                {skill}
+                              </Badge>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* JOB STATUS */}
+                    <Card className="bg-gray-800 border-gray-700">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <Briefcase className="h-5 w-5 text-purple-400" />
+                          Job Search Status
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-700">
+                          <span className="text-white font-medium">Open to Work</span>
+                          <Badge className={selectedUser.isOpenToWork ? 'bg-green-600' : 'bg-gray-600'}>
+                            {selectedUser.isOpenToWork ? 'Yes' : 'No'}
+                          </Badge>
+                        </div>
+                        {selectedUser.linkedinUrl && (
+                          <div className="mt-3 p-3 rounded-lg bg-gray-700">
+                            <div className="text-xs text-gray-400 mb-1">LinkedIn Profile</div>
+                            <a 
+                              href={selectedUser.linkedinUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-sm text-blue-400 hover:underline"
+                            >
+                              {selectedUser.linkedinUrl}
+                            </a>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* COLLEGE-SPECIFIC DETAILS */}
+                {selectedUser.role === 'college' && (
+                  <Card className="bg-gray-800 border-gray-700">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-white flex items-center gap-2">
+                        <Database className="h-5 w-5 text-green-400" />
+                        College Information
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="p-3 rounded-lg bg-gray-700">
+                          <div className="text-xs text-gray-400">College Name</div>
+                          <div className="text-sm font-medium text-white">{selectedUser.collegeName || 'N/A'}</div>
+                        </div>
+                        <div className="p-3 rounded-lg bg-gray-700">
+                          <div className="text-xs text-gray-400">College Code</div>
+                          <div className="text-sm font-medium text-white">{selectedUser.collegeCode || 'N/A'}</div>
+                        </div>
+                        <div className="p-3 rounded-lg bg-gray-700">
+                          <div className="text-xs text-gray-400">Location</div>
+                          <div className="text-sm font-medium text-white">{selectedUser.location || 'N/A'}</div>
+                        </div>
+                        <div className="p-3 rounded-lg bg-gray-700">
+                          <div className="text-xs text-gray-400">Total Students</div>
+                          <div className="text-sm font-medium text-white">{selectedUser.totalStudents || 0}</div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* RECRUITER-SPECIFIC DETAILS */}
+                {selectedUser.role === 'recruiter' && (
+                  <Card className="bg-gray-800 border-gray-700">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-white flex items-center gap-2">
+                        <Briefcase className="h-5 w-5 text-purple-400" />
+                        Recruiter Information
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="p-3 rounded-lg bg-gray-700">
+                          <div className="text-xs text-gray-400">Company</div>
+                          <div className="text-sm font-medium text-white">{selectedUser.companyName || 'N/A'}</div>
+                        </div>
+                        <div className="p-3 rounded-lg bg-gray-700">
+                          <div className="text-xs text-gray-400">Designation</div>
+                          <div className="text-sm font-medium text-white">{selectedUser.designation || 'N/A'}</div>
+                        </div>
+                        <div className="p-3 rounded-lg bg-gray-700">
+                          <div className="text-xs text-gray-400">Industry</div>
+                          <div className="text-sm font-medium text-white">{selectedUser.industry || 'N/A'}</div>
+                        </div>
+                        <div className="p-3 rounded-lg bg-gray-700">
+                          <div className="text-xs text-gray-400">Company Size</div>
+                          <div className="text-sm font-medium text-white">{selectedUser.companySize || 'N/A'}</div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* ACCOUNT METADATA */}
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-white flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-gray-400" />
+                      Account Metadata
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-3 rounded-lg bg-gray-700">
+                        <div className="text-xs text-gray-400">Account Created</div>
+                        <div className="text-sm font-medium text-white">
+                          {new Date(selectedUser.createdAt).toLocaleString()}
+                        </div>
+                      </div>
+                      <div className="p-3 rounded-lg bg-gray-700">
+                        <div className="text-xs text-gray-400">Last Updated</div>
+                        <div className="text-sm font-medium text-white">
+                          {new Date(selectedUser.updatedAt).toLocaleString()}
+                        </div>
+                      </div>
+                      <div className="p-3 rounded-lg bg-gray-700">
+                        <div className="text-xs text-gray-400">User ID</div>
+                        <div className="text-xs font-mono text-white break-all">{selectedUser._id}</div>
+                      </div>
+                      <div className="p-3 rounded-lg bg-gray-700">
+                        <div className="text-xs text-gray-400">Account Status</div>
+                        <Badge className="bg-green-600 text-white mt-1">Active</Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </ScrollArea>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -1227,28 +1738,99 @@ function getMockAdminData(): AdminData {
     },
     recentActivity: [
       {
-        type: "signup",
+        type: "user_signup",
         user: "alex.chen@demo.com",
         action: "signed up as student",
-        timestamp: "2 minutes ago"
+        timestamp: "2 minutes ago",
+        details: {
+          userName: "Alex Chen",
+          userRole: "student",
+          ip: "192.168.1.xxx"
+        }
       },
       {
         type: "platform_link",
         user: "priya.sharma@demo.com",
         action: "connected LeetCode account",
-        timestamp: "5 minutes ago"
+        timestamp: "5 minutes ago",
+        details: {
+          userName: "Priya Sharma",
+          userRole: "student",
+          platform: "LeetCode",
+          ip: "192.168.2.xxx"
+        }
       },
       {
-        type: "login",
+        type: "user_login",
         user: "placement@mit.edu",
         action: "logged in",
-        timestamp: "8 minutes ago"
+        timestamp: "8 minutes ago",
+        details: {
+          userName: "MIT Placement Office",
+          userRole: "college",
+          page: "/college/dashboard",
+          ip: "192.168.3.xxx"
+        }
       },
       {
         type: "job_application",
         user: "john.doe@student.com",
         action: "applied to Software Engineer position",
-        timestamp: "12 minutes ago"
+        timestamp: "12 minutes ago",
+        details: {
+          userName: "John Doe",
+          userRole: "student",
+          jobTitle: "Software Engineer at Google",
+          ip: "192.168.4.xxx"
+        }
+      },
+      {
+        type: "page_view",
+        user: "recruiter@google.com",
+        action: "viewed candidate search page",
+        timestamp: "15 minutes ago",
+        details: {
+          userName: "Google Recruiter",
+          userRole: "recruiter",
+          page: "/recruiter/search",
+          ip: "192.168.5.xxx"
+        }
+      },
+      {
+        type: "platform_link",
+        user: "sarah.wilson@demo.com",
+        action: "connected GitHub account",
+        timestamp: "18 minutes ago",
+        details: {
+          userName: "Sarah Wilson",
+          userRole: "student",
+          platform: "GitHub",
+          ip: "192.168.6.xxx"
+        }
+      },
+      {
+        type: "user_login",
+        user: "admin@stanford.edu",
+        action: "logged in",
+        timestamp: "22 minutes ago",
+        details: {
+          userName: "Stanford Admin",
+          userRole: "college",
+          page: "/college/students",
+          ip: "192.168.7.xxx"
+        }
+      },
+      {
+        type: "custom",
+        user: "rahul.kumar@demo.com",
+        action: "synced platform statistics",
+        timestamp: "25 minutes ago",
+        details: {
+          userName: "Rahul Kumar",
+          userRole: "student",
+          platforms: ["LeetCode", "Codeforces", "CodeChef"],
+          ip: "192.168.8.xxx"
+        }
       }
     ],
     platformHealth: [
@@ -1316,5 +1898,108 @@ function getMockAdminData(): AdminData {
         rating: 1650
       }
     ]
+  }
+}
+
+// Mock user details for demonstration
+function getMockUserDetails(email: string): any {
+  const mockUsers: Record<string, any> = {
+    "alex.chen@demo.com": {
+      _id: "user_001",
+      name: "Alex Chen",
+      email: "alex.chen@demo.com",
+      role: "student",
+      collegeCode: "MIT2024",
+      rollNumber: "CS2024001",
+      graduationYear: 2024,
+      branch: "Computer Science",
+      skills: ["JavaScript", "Python", "React", "Node.js", "MongoDB", "Machine Learning"],
+      linkedPlatforms: {
+        leetcode: { username: "alexchen", lastSync: new Date() },
+        github: { username: "alex-chen-dev", lastSync: new Date() },
+        codeforces: { username: "alexc", lastSync: new Date() },
+        codechef: { username: "alex_chen", lastSync: new Date() }
+      },
+      stats: {
+        totalProblems: 1250,
+        easyProblems: 450,
+        mediumProblems: 650,
+        hardProblems: 150,
+        githubContributions: 892,
+        contestsParticipated: 45,
+        rating: 2100
+      },
+      isOpenToWork: true,
+      linkedinUrl: "https://linkedin.com/in/alexchen",
+      createdAt: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date()
+    },
+    "priya.sharma@demo.com": {
+      _id: "user_002",
+      name: "Priya Sharma",
+      email: "priya.sharma@demo.com",
+      role: "student",
+      collegeCode: "IIT2025",
+      rollNumber: "CS2025042",
+      graduationYear: 2025,
+      branch: "Computer Science & Engineering",
+      skills: ["C++", "Python", "Data Structures", "Algorithms", "Competitive Programming"],
+      linkedPlatforms: {
+        leetcode: { username: "priya_sharma", lastSync: new Date() },
+        codeforces: { username: "priya_s", lastSync: new Date() },
+        codechef: { username: "priyasharma", lastSync: new Date() }
+      },
+      stats: {
+        totalProblems: 980,
+        easyProblems: 320,
+        mediumProblems: 520,
+        hardProblems: 140,
+        githubContributions: 456,
+        contestsParticipated: 38,
+        rating: 1850
+      },
+      isOpenToWork: true,
+      linkedinUrl: "https://linkedin.com/in/priyasharma",
+      createdAt: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date()
+    },
+    "placement@mit.edu": {
+      _id: "college_001",
+      name: "MIT Placement Office",
+      email: "placement@mit.edu",
+      role: "college",
+      collegeName: "Massachusetts Institute of Technology",
+      collegeCode: "MIT",
+      location: "Cambridge, MA, USA",
+      website: "https://mit.edu",
+      totalStudents: 1250,
+      departments: ["Computer Science", "Electrical Engineering", "Mechanical Engineering"],
+      createdAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date()
+    },
+    "recruiter@google.com": {
+      _id: "recruiter_001",
+      name: "Google Recruiter",
+      email: "recruiter@google.com",
+      role: "recruiter",
+      companyName: "Google",
+      companyWebsite: "https://google.com",
+      companySize: "10000+",
+      industry: "Technology",
+      designation: "Senior Technical Recruiter",
+      hiringFor: ["Software Engineer", "Data Scientist", "Product Manager"],
+      preferredSkills: ["Python", "Java", "System Design", "Machine Learning"],
+      createdAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000),
+      updatedAt: new Date()
+    }
+  }
+
+  return mockUsers[email] || {
+    _id: "unknown",
+    name: email.split('@')[0],
+    email: email,
+    role: "student",
+    createdAt: new Date(),
+    updatedAt: new Date()
   }
 }

@@ -249,7 +249,7 @@ export function DashboardClient({ student: initialStudent }: DashboardClientProp
     let githubRepositories = 0
     let highestRating = 0
     let contestsFromHighestRatedPlatform = 0
-    let highestRatedPlatform = null
+    let highestRatedPlatform: string | null = null
 
     console.log('=== DEBUGGING RATING CALCULATION ===')
     console.log('linkedPlatforms:', linkedPlatforms)
@@ -588,10 +588,10 @@ export function DashboardClient({ student: initialStudent }: DashboardClientProp
           return `http://www.usaco.org/index.php?page=viewuser&uid=${username}`
         }
         
-        // Try to construct a reasonable profile URL
-        const platformData = (typeof data === 'object' && 'platformUrl' in data) ? data.platformUrl : null
-        if (platformData) {
-          return `${platformData}/profile/${username}`
+        // Try to construct a reasonable profile URL from platformData
+        const customUrl = (typeof platformData === 'object' && platformData && 'platformUrl' in platformData) ? platformData.platformUrl : null
+        if (customUrl) {
+          return `${customUrl}/profile/${username}`
         }
         return `https://${platformId}.com/profile/${username}`
       }

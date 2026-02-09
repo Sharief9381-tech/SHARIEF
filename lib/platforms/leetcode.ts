@@ -6,6 +6,7 @@ export interface LeetCodeStats {
   hardSolved: number
   ranking: number
   contributionPoints: number
+  reputation: number
 }
 
 export async function fetchLeetCodeStats(username: string): Promise<LeetCodeStats | null> {
@@ -90,6 +91,7 @@ export async function fetchLeetCodeStats(username: string): Promise<LeetCodeStat
       hardSolved,
       ranking: user.profile?.ranking || 0,
       contributionPoints: user.contributions?.points || 0,
+      reputation: 0, // Not available in LeetCode API
     }
   } catch (error) {
     console.error("Error fetching LeetCode stats:", error)

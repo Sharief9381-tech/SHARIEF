@@ -38,7 +38,10 @@ export async function POST(request: Request) {
     }
 
     const token = await createSession(user._id as string, user.role as UserRole)
-    console.log("Session created, redirecting to:", `/${user.role}/dashboard`)
+    
+    // Determine redirect URL - admin users go to admin portal
+    const redirectTo = user.email === "admin@codetrack.com" ? "/admin" : `/${user.role}/dashboard`
+    console.log("Session created, redirecting to:", redirectTo)
 
     const cookieStore = await cookies()
     cookieStore.set("session_token", token, {
@@ -55,7 +58,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       user: userWithoutPassword,
-      redirectTo: `/${user.role}/dashboard`,
+      redirectTo: redirectTo,
       message: "Login successful (using fallback storage)"
     })
   } catch (error) {
