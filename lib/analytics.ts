@@ -146,7 +146,8 @@ export class Analytics {
         action: e.action,
         userRole: e.userRole,
         timestamp: e.timestamp,
-        ip: e.ip ? this.maskIP(e.ip) : undefined
+        ip: e.ip ? this.maskIP(e.ip) : undefined,
+        metadata: e.metadata // Include full metadata with user info
       }))
 
     // Hourly activity (last 24 hours)

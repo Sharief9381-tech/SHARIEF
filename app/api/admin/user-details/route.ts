@@ -6,8 +6,8 @@ export async function GET(request: Request) {
   try {
     const currentUser = await getCurrentUser()
     
-    // Only allow admin users
-    if (!currentUser || (currentUser.role !== "admin" && currentUser.email !== "admin@codetrack.com")) {
+    // Only allow admin users - check email since role might not be "admin" in type system
+    if (!currentUser || currentUser.email !== "admin@codetrack.com") {
       return NextResponse.json(
         { error: "Unauthorized - Admin access required" },
         { status: 401 }
@@ -24,17 +24,20 @@ export async function GET(request: Request) {
       )
     }
 
-    let user = null
+    let user: any = null
 
     // Try to fetch from database first
     if (isDatabaseAvailable()) {
       try {
         const db = await getDatabase()
-        user = await db.collection('users').findOne({ email: email })
+        const dbUser = await db.collection('users').findOne({ email: email })
         
-        if (user) {
-          // Convert MongoDB _id to string
-          user._id = user._id?.toString()
+        if (dbUser) {
+          // Convert MongoDB _id to string and create a plain object
+          user = {
+            ...dbUser,
+            _id: dbUser._id?.toString()
+          }
         }
       } catch (error) {
         console.error("Database query error:", error)

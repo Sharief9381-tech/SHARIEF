@@ -159,12 +159,13 @@ async function gatherAdminData() {
     const analytics = await Analytics.getAnalytics('today')
     data.systemMetrics.apiCalls = analytics.summary.totalEvents
 
-    // Get recent activity from analytics
+    // Get recent activity from analytics with full user details
     data.recentActivity = analytics.recentActivity.slice(0, 10).map(activity => ({
       type: activity.type,
       user: activity.userRole ? `${activity.userRole} user` : 'Anonymous user',
       action: getActivityDescription(activity.type, activity.page, activity.action),
-      timestamp: getRelativeTime(new Date(activity.timestamp))
+      timestamp: getRelativeTime(new Date(activity.timestamp)),
+      details: activity.metadata || {} // Include all metadata which contains user info
     }))
 
     // Mock platform health data (in real implementation, this would ping each platform)

@@ -47,11 +47,33 @@ export async function POST(request: Request) {
     // Get current user if available
     const user = await getCurrentUser()
 
+    // Build comprehensive metadata with user information
+    const enrichedMetadata = {
+      ...metadata,
+      userEmail: user?.email,
+      userName: user?.name,
+      userRole: user?.role,
+      // Add role-specific details
+      ...(user?.role === 'student' && {
+        collegeCode: (user as any).collegeCode,
+        branch: (user as any).branch,
+        graduationYear: (user as any).graduationYear
+      }),
+      ...(user?.role === 'college' && {
+        collegeName: (user as any).collegeName,
+        collegeCode: (user as any).collegeCode
+      }),
+      ...(user?.role === 'recruiter' && {
+        companyName: (user as any).companyName,
+        designation: (user as any).designation
+      })
+    }
+
     await Analytics.track({
       type,
       page,
       action,
-      metadata,
+      metadata: enrichedMetadata,
       userId: user?._id?.toString(),
       userRole: user?.role,
     }, {
