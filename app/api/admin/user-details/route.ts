@@ -7,7 +7,7 @@ export async function GET(request: Request) {
     const currentUser = await getCurrentUser()
     
     // Only allow admin users - check email since role might not be "admin" in type system
-    if (!currentUser || currentUser.email !== "admin@codetrack.com") {
+    if (!currentUser || currentUser.email !== "sharief9381@gmail.com") {
       return NextResponse.json(
         { error: "Unauthorized - Admin access required" },
         { status: 401 }

@@ -5,15 +5,15 @@ async function createAdminUser() {
   // Create admin user (using college role since admin check is email-based)
   const admin = await createCollege({
     name: "System Administrator",
-    email: "admin@codetrack.com",
-    password: "admin123",
+    email: "sharief9381@gmail.com",
+    password: "12341234",
     role: "college",
     collegeName: "CodeTrack System",
     collegeCode: "ADMIN",
     location: "System",
     website: "https://codetrack.com",
     placementOfficerName: "System Admin",
-    placementOfficerEmail: "admin@codetrack.com",
+    placementOfficerEmail: "sharief9381@gmail.com",
     totalStudents: 0,
     departments: ["System Administration"],
   })
@@ -28,8 +28,8 @@ async function createAdminUser() {
       role: admin.role
     },
     credentials: {
-      email: "admin@codetrack.com",
-      password: "admin123"
+      email: "sharief9381@gmail.com",
+      password: "12341234"
     },
     accessUrls: {
       admin: "/admin",

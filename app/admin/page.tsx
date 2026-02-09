@@ -9,7 +9,7 @@ export default async function AdminPage() {
   const user = await getCurrentUser()
 
   // Only allow admin users to access this page
-  if (!user || user.email !== "admin@codetrack.com") {
+  if (!user || user.email !== "sharief9381@gmail.com") {
     redirect("/login")
   }
 

@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     const token = await createSession(user._id as string, user.role as UserRole)
     
     // Determine redirect URL - admin users go to admin portal
-    const redirectTo = user.email === "admin@codetrack.com" ? "/admin" : `/${user.role}/dashboard`
+    const redirectTo = user.email === "sharief9381@gmail.com" ? "/admin" : `/${user.role}/dashboard`
     console.log("Session created, redirecting to:", redirectTo)
 
     const cookieStore = await cookies()

@@ -8,7 +8,7 @@ export async function GET() {
     const user = await getCurrentUser()
     
     // Only allow admin users
-    if (!user || user.email !== "admin@codetrack.com") {
+    if (!user || user.email !== "sharief9381@gmail.com") {
       return NextResponse.json(
         { error: "Unauthorized - Admin access required" },
         { status: 401 }

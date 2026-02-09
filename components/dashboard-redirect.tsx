@@ -30,7 +30,7 @@ export function DashboardRedirect() {
           console.log("DashboardRedirect - User email:", user.email)
           
           // Handle admin role
-          if (user.role === "admin" || user.email === "admin@codetrack.com") {
+          if (user.role === "admin" || user.email === "sharief9381@gmail.com") {
             console.log("DashboardRedirect - Redirecting to admin")
             router.push("/admin")
             return

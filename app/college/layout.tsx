@@ -16,7 +16,7 @@ export default async function CollegeLayout({
   }
 
   // Redirect admin users to admin portal instead of college portal
-  if (user.email === "admin@codetrack.com") {
+  if (user.email === "sharief9381@gmail.com") {
     redirect("/admin")
   }
 

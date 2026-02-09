@@ -3,8 +3,8 @@
 ## 🔴 ADMIN USER
 
 ### Login Credentials
-- **Email**: `admin@codetrack.com`
-- **Password**: `admin123`
+- **Email**: `sharief9381@gmail.com`
+- **Password**: `12341234`
 - **Access URL**: `http://localhost:3000/admin`
 
 ### How to Create Admin User
@@ -33,14 +33,14 @@ fetch('/api/auth/signup', {
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
     name: "System Administrator",
-    email: "admin@codetrack.com",
-    password: "admin123",
+    email: "sharief9381@gmail.com",
+    password: "12341234",
     role: "college",
     collegeName: "CodeTrack System",
     collegeCode: "ADMIN",
     location: "System",
     placementOfficerName: "System Admin",
-    placementOfficerEmail: "admin@codetrack.com",
+    placementOfficerEmail: "sharief9381@gmail.com",
   })
 }).then(r => r.json()).then(console.log)
 ```
@@ -86,17 +86,17 @@ Once logged in as admin, you'll have access to:
 
 ## 🔐 Security Notes
 
-- Admin access is determined by email (`admin@codetrack.com`)
+- Admin access is determined by email (`sharief9381@gmail.com`)
 - The admin user is created with "college" role in the database
-- Access control checks for `user.email === "admin@codetrack.com"`
+- Access control checks for `user.email === "sharief9381@gmail.com"`
 - All admin routes are protected with authentication middleware
 
 ## 🧪 Testing Admin Features
 
 1. **Login as Admin**
    ```
-   Email: admin@codetrack.com
-   Password: admin123
+   Email: sharief9381@gmail.com
+   Password: 12341234
    ```
 
 2. **Access Admin Dashboard**
@@ -160,7 +160,7 @@ If you get an error that the admin user already exists, you can:
 2. Or just login with the existing credentials
 
 ### Can't access admin dashboard
-- Make sure you're logged in with `admin@codetrack.com`
+- Make sure you're logged in with `sharief9381@gmail.com`
 - Check that the session is valid
 - Try logging out and logging back in
 

@@ -7,7 +7,7 @@ export async function GET(request: Request) {
     const user = await getCurrentUser()
     
     // Only allow admin users or college users to view analytics
-    if (!user || (user.role !== "college" && user.email !== "admin@codetrack.com")) {
+    if (!user || (user.role !== "college" && user.email !== "sharief9381@gmail.com")) {
       return NextResponse.json(
         { error: "Unauthorized - Admin access required" },
         { status: 401 }

@@ -14,7 +14,7 @@ export default async function AdminLayout({
   }
 
   // Only allow admin users to access admin routes
-  if (user.email !== "admin@codetrack.com") {
+  if (user.email !== "sharief9381@gmail.com") {
     redirect("/login")
   }
 

@@ -41,8 +41,8 @@ export function DebugInfo() {
         </div>
         <div>
           <strong>Is Admin:</strong> 
-          <Badge variant={user?.email === "admin@codetrack.com" ? "destructive" : "secondary"} className="ml-2">
-            {user?.email === "admin@codetrack.com" ? "YES" : "NO"}
+          <Badge variant={user?.email === "sharief9381@gmail.com" ? "destructive" : "secondary"} className="ml-2">
+            {user?.email === "sharief9381@gmail.com" ? "YES" : "NO"}
           </Badge>
         </div>
         <div className="pt-2 border-t text-red-600">

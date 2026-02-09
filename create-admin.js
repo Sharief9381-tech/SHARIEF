@@ -8,14 +8,14 @@ const createAdmin = async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: "Admin User",
-        email: "admin@codetrack.com",
-        password: "admin123",
+        email: "sharief9381@gmail.com",
+        password: "12341234",
         role: "college", // We'll use college role since admin check is email-based
         collegeName: "CodeTrack Admin",
         collegeCode: "ADMIN",
         location: "System",
         placementOfficerName: "System Admin",
-        placementOfficerEmail: "admin@codetrack.com",
+        placementOfficerEmail: "sharief9381@gmail.com",
       })
     })
     
@@ -23,8 +23,8 @@ const createAdmin = async () => {
     
     if (response.ok) {
       console.log('✅ Admin user created successfully!')
-      console.log('Email: admin@codetrack.com')
-      console.log('Password: admin123')
+      console.log('Email: sharief9381@gmail.com')
+      console.log('Password: 12341234')
       console.log('You can now access /admin')
     } else {
       console.log('❌ Failed to create admin:', result.error)
