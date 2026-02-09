@@ -12,13 +12,6 @@ export function DashboardRedirect() {
     const showHomepage = searchParams.get('home') === 'true'
     if (showHomepage) return
 
-    // DEVELOPMENT MODE: Disable auto-redirect on homepage
-    // Remove this check in production
-    if (process.env.NODE_ENV === 'development' && window.location.pathname === '/') {
-      console.log("DashboardRedirect - Development mode: Auto-redirect disabled on homepage")
-      return
-    }
-
     const checkAuthAndRedirect = async () => {
       try {
         const response = await fetch("/api/auth/user")
